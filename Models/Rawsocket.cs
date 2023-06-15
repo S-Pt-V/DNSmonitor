@@ -1,5 +1,4 @@
 ﻿using DNSmonitor.Controllers;
-using DNSmonitor.Models;
 using System.Net;
 using System.Net.Sockets;
 using static DNSmonitor.Models.Headers;
@@ -11,7 +10,7 @@ using static DNSmonitor.Models.Headers;
 namespace DNSmonitor.Models
 {
     /// <summary>
-    /// Rawsocket
+    /// Rawsocket类定义
     /// </summary>
     public class Rawsocket
     {
@@ -19,6 +18,16 @@ namespace DNSmonitor.Models
 
         //是否有错误产生
         private bool error_occured;
+        /// <summary>
+        /// 是否有错误发生
+        /// </summary>
+        public bool ErrorOccured
+        {
+            get
+            {
+                return error_occured;
+            }
+        }
         /// <summary>
         /// 是否继续运行
         /// </summary>
@@ -30,33 +39,17 @@ namespace DNSmonitor.Models
         
         //socket
         private Socket? socket;
-        //监听所有数据包
         const int SIO_R = unchecked((int)0x98000001);
         const int SIO_1 = unchecked((int)0x98000002);
         const int SIO_2 = unchecked((int)0x98000003);
-
-        /*
-        private static Rawsocket? _instance;
-        public static Rawsocket Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new Rawsocket();
-                }
-                return _instance;
-            }
-        }
-        */
 
         /// <summary>
         /// 构造函数
         /// </summary>
         public Rawsocket(ILogger<RawsocketController> logger)
         {
-            KeepRunning = true;
             _logger = logger;
+            KeepRunning = true;
             error_occured = false;
             len_receive_buf = 40960;
             receive_buf_bytes = new byte[len_receive_buf];
@@ -81,7 +74,7 @@ namespace DNSmonitor.Models
                 _logger.LogInformation("Rawsocket created.");
                 // socket绑定到IP终结点
                 socket.Bind(new IPEndPoint(IPAddress.Parse(IP), 0));
-                _logger.LogInformation("Rawsocket binded.");
+                _logger.LogInformation("Rawsocket binded on " + IP);
 
                 // 设置Rawsocket功能
                 if (SetSocketOption() == false)
@@ -154,17 +147,6 @@ namespace DNSmonitor.Models
         }
 
         /// <summary>
-        /// 是否有错误发生
-        /// </summary>
-        public bool ErrorOccured
-        {
-            get
-            {
-                return error_occured;
-            }
-        }
-
-        /// <summary>
         /// 运行RawSocket
         /// </summary>
         public void Run()
@@ -192,8 +174,8 @@ namespace DNSmonitor.Models
         /// 接收数据包
         /// 形成PacketArrivedEventArgs时间数据类对象，并引发PacketArrival事件
         /// </summary>
-        /// <param name="buf"></param>
-        /// <param name="len"></param>
+        /// <param name="buf">接收缓冲区</param>
+        /// <param name="len">接收数据长度</param>
         unsafe private void Receive(byte[] buf, int len)
         {
             // _logger.LogInformation("Receive");
@@ -252,20 +234,14 @@ namespace DNSmonitor.Models
                 temp_dstport = (ushort)((byte)fixed_buf[e.HeaderLength + 2] * 256 + (byte)fixed_buf[e.HeaderLength + 3]);
                 e.OriginationPort = temp_srcport.ToString();
                 e.DestinationPort = temp_dstport.ToString();
-                /*
-                if (e.DestinationAddress == "114.114.114.114")
-                {
-                    _logger.LogInformation(((uint)(*(byte*)(&fixed_buf[e.HeaderLength]))).ToString() + " " + ((uint)(*(byte*)(&fixed_buf[e.HeaderLength + 1]))).ToString() + " " + ((uint)(*(byte*)(&fixed_buf[e.HeaderLength + 2]))).ToString() + " " + ((uint)(*(byte*)(&fixed_buf[e.HeaderLength + 3]))).ToString());
-                    _logger.LogInformation(temp_srcport.ToString() + " " + temp_dstport.ToString());
-                }
-                */
+                
                 e.TotalPacketlength = (uint)len;
                 e.MessageLength = (uint)len - e.HeaderLength;
 
                 // 将首部数据和携带数据写入各自的缓存
                 e.ReceiveBuffer = buf;
                 Array.Copy(buf, 0, e.HeaderBuffer, 0, (int)e.HeaderLength);
-                Array.Copy(buf, (int)e.HeaderLength, e.MessageBuffer, 0, e.MessageLength);
+                Array.Copy(buf, (int)e.HeaderLength, e.MessageBuffer, 0, (int)e.MessageLength);
             }
 
             OnPacketArrival(e);
@@ -277,13 +253,13 @@ namespace DNSmonitor.Models
         /// <param name="ar"></param>
         private void CallReceive(IAsyncResult ar)
         {
-            // _logger.LogInformation("CallReceive");
-            int received_bytes;
-            if(socket == null)
+            if (socket == null)
             {
                 _logger.LogError("socket is null --CallReceive");
                 return;
             }
+            // _logger.LogInformation("CallReceive");
+            int received_bytes;
             received_bytes = socket.EndReceive(ar);
             Receive(receive_buf_bytes, received_bytes);
             if (KeepRunning)
