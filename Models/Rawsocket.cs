@@ -91,23 +91,6 @@ namespace DNSmonitor.Models
         }
 
         /// <summary>
-        /// 关闭套接字
-        /// </summary>
-        public void Shutdown()
-        {
-            if (socket != null)
-            {
-                _logger.LogInformation("Shutting dwon socket.");
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
-            }
-            else
-            {
-                _logger.LogError("socket is null --Shutdown");
-            }
-        }
-
-        /// <summary>
         /// 设置具有IO控制功能的Socket
         /// </summary>
         /// <returns></returns>
@@ -311,6 +294,23 @@ namespace DNSmonitor.Models
                 _logger.LogError(ex.ToString());
                 KeepRunning = false;
                 return;
+            }
+        }
+
+        /// <summary>
+        /// 关闭套接字
+        /// </summary>
+        public void Shutdown()
+        {
+            if (socket != null)
+            {
+                _logger.LogInformation("Shutting dwon socket.");
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+            }
+            else
+            {
+                _logger.LogError("socket is null --Shutdown");
             }
         }
     }
