@@ -295,10 +295,7 @@ namespace DNSmonitor.Models
             {
                 PacketArrival(this, e);
             }
-            if (e.OriginationAddress == "220.181.38.150" || e.DestinationAddress == "220.181.38.150")
-            {
-                _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
-            }
+            _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
         }
     }
 }

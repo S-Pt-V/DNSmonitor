@@ -164,7 +164,12 @@
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>
-            Rawsocket
+            Rawsocket类定义
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Rawsocket.ErrorOccured">
+            <summary>
+            是否有错误发生
             </summary>
         </member>
         <member name="F:DNSmonitor.Models.Rawsocket.KeepRunning">
@@ -194,11 +199,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="P:DNSmonitor.Models.Rawsocket.ErrorOccured">
-            <summary>
-            是否有错误发生
-            </summary>
-        </member>
         <member name="M:DNSmonitor.Models.Rawsocket.Run">
             <summary>
             运行RawSocket
@@ -209,8 +209,8 @@
             接收数据包
             形成PacketArrivedEventArgs时间数据类对象，并引发PacketArrival事件
             </summary>
-            <param name="buf"></param>
-            <param name="len"></param>
+            <param name="buf">接收缓冲区</param>
+            <param name="len">接收数据长度</param>
         </member>
         <member name="M:DNSmonitor.Models.Rawsocket.CallReceive(System.IAsyncResult)">
             <summary>

@@ -27,6 +27,7 @@ namespace DNSmonitor.Controllers
         /// </summary>
         /// <param name="logger"></param>
         public RawsocketController(ILogger<RawsocketController> logger, IConfiguration configuration)
+        //public RawsocketController(ILogger<RawsocketController> logger)
         {
             _logger = logger;
             _configuration = configuration;
