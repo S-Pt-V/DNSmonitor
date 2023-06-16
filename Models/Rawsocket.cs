@@ -51,7 +51,7 @@ namespace DNSmonitor.Models
             _logger = logger;
             KeepRunning = true;
             error_occured = false;
-            len_receive_buf = 65536;
+            len_receive_buf = 131072;
             receive_buf_bytes = new byte[len_receive_buf];
         }
 
@@ -171,6 +171,37 @@ namespace DNSmonitor.Models
         }
 
         /// <summary>
+        /// 接收数据回调函数
+        /// </summary>
+        /// <param name="ar"></param>
+        private void CallReceive(IAsyncResult ar)
+        {
+            try
+            {
+                if (socket == null)
+                {
+                    _logger.LogError("socket is null --CallReceive");
+                    return;
+                }
+                // _logger.LogInformation("CallReceive");
+                int received_bytes = 0;
+                received_bytes = socket.EndReceive(ar);
+                _logger.LogInformation(received_bytes.ToString());
+                Receive(receive_buf_bytes, received_bytes);
+                if (KeepRunning)
+                {
+                    Run();
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                KeepRunning = false;
+                return;
+            }
+        }
+
+        /// <summary>
         /// 接收数据包
         /// 形成PacketArrivedEventArgs时间数据类对象，并引发PacketArrival事件
         /// </summary>
@@ -188,9 +219,9 @@ namespace DNSmonitor.Models
             ushort temp_dstport = 0;
             IPAddress temp_ip;
 
-            PacketArrivedEventArgs  e = new PacketArrivedEventArgs(len_receive_buf);
+            PacketArrivedEventArgs e = new PacketArrivedEventArgs(len_receive_buf);
 
-            fixed(byte *fixed_buf = buf)
+            fixed (byte* fixed_buf = buf)
             {
                 // head指针指向接收到的数据包
                 IPHeader* head = (IPHeader*)fixed_buf;
@@ -198,7 +229,7 @@ namespace DNSmonitor.Models
                 e.HeaderLength = (uint)(head->ip_verlen & 0x0F) << 2;
                 // 获取协议类型
                 temp_protocol = head->ip_protocol;
-                switch(temp_protocol)
+                switch (temp_protocol)
                 {
                     case 1:
                         e.Protocol = "ICMP";
@@ -234,7 +265,7 @@ namespace DNSmonitor.Models
                 temp_dstport = (ushort)((byte)fixed_buf[e.HeaderLength + 2] * 256 + (byte)fixed_buf[e.HeaderLength + 3]);
                 e.OriginationPort = temp_srcport.ToString();
                 e.DestinationPort = temp_dstport.ToString();
-                
+
                 e.TotalPacketlength = (uint)len;
                 e.MessageLength = (uint)len - e.HeaderLength;
 
@@ -246,41 +277,6 @@ namespace DNSmonitor.Models
 
             OnPacketArrival(e);
         }
-
-        /// <summary>
-        /// 接收数据回调函数
-        /// </summary>
-        /// <param name="ar"></param>
-        private void CallReceive(IAsyncResult ar)
-        {
-            try
-            {
-                if (socket == null)
-                {
-                    _logger.LogError("socket is null --CallReceive");
-                    return;
-                }
-                // _logger.LogInformation("CallReceive");
-                int received_bytes = 0;
-                received_bytes = socket.EndReceive(ar);
-                _logger.LogInformation(received_bytes.ToString());
-                Receive(receive_buf_bytes, received_bytes);
-                if (KeepRunning)
-                {
-                    Run();
-                }
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                KeepRunning = false;
-                return;
-            }
-        }
-
-        /*
-         * EventArgs定义
-        */
 
         /// <summary>
         /// 
@@ -307,6 +303,7 @@ namespace DNSmonitor.Models
                 {
                     PacketArrival(this, e);
                 }
+                // SystemStackOverflowException Here
                 _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
             }
             catch(Exception ex)

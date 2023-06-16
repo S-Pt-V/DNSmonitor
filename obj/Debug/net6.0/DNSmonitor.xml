@@ -204,6 +204,12 @@
             运行RawSocket
             </summary>
         </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.CallReceive(System.IAsyncResult)">
+            <summary>
+            接收数据回调函数
+            </summary>
+            <param name="ar"></param>
+        </member>
         <member name="M:DNSmonitor.Models.Rawsocket.Receive(System.Byte[],System.Int32)">
             <summary>
             接收数据包
@@ -211,12 +217,6 @@
             </summary>
             <param name="buf">接收缓冲区</param>
             <param name="len">接收数据长度</param>
-        </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.CallReceive(System.IAsyncResult)">
-            <summary>
-            接收数据回调函数
-            </summary>
-            <param name="ar"></param>
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket.PacketArrivedEventHandler">
             <summary>
