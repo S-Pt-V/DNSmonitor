@@ -51,7 +51,7 @@ namespace DNSmonitor.Models
             _logger = logger;
             KeepRunning = true;
             error_occured = false;
-            len_receive_buf = 40960;
+            len_receive_buf = 65536;
             receive_buf_bytes = new byte[len_receive_buf];
         }
 
@@ -253,18 +253,28 @@ namespace DNSmonitor.Models
         /// <param name="ar"></param>
         private void CallReceive(IAsyncResult ar)
         {
-            if (socket == null)
+            try
             {
-                _logger.LogError("socket is null --CallReceive");
-                return;
+                if (socket == null)
+                {
+                    _logger.LogError("socket is null --CallReceive");
+                    return;
+                }
+                // _logger.LogInformation("CallReceive");
+                int received_bytes = 0;
+                received_bytes = socket.EndReceive(ar);
+                _logger.LogInformation(received_bytes.ToString());
+                Receive(receive_buf_bytes, received_bytes);
+                if (KeepRunning)
+                {
+                    Run();
+                }
             }
-            // _logger.LogInformation("CallReceive");
-            int received_bytes;
-            received_bytes = socket.EndReceive(ar);
-            Receive(receive_buf_bytes, received_bytes);
-            if (KeepRunning)
+            catch(Exception ex)
             {
-                Run();
+                _logger.LogError(ex.ToString());
+                KeepRunning = false;
+                return;
             }
         }
 
@@ -290,12 +300,21 @@ namespace DNSmonitor.Models
         /// <param name="e"></param>
         protected virtual void OnPacketArrival(PacketArrivedEventArgs e)
         {
-            // _logger.LogInformation("OnPacketArrival");
-            if (PacketArrival != null)
+            try
             {
-                PacketArrival(this, e);
+                // _logger.LogInformation("OnPacketArrival");
+                if (PacketArrival != null)
+                {
+                    PacketArrival(this, e);
+                }
+                _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
             }
-            _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                KeepRunning = false;
+                return;
+            }
         }
     }
 }
