@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using DNSmonitor.Controllers;
+using Microsoft.AspNetCore.DataProtection;
 using System.Net;
 using System.Net.Sockets;
 using static DNSmonitor.Models.Headers;
@@ -10,6 +11,8 @@ namespace DNSmonitor.Models
     /// </summary>
     public class Monitor
     {
+        private readonly ILogger<MonitorController> _logger;
+
         // 监听用的IP
         const string IP = "10.200.1.233";
 
@@ -39,8 +42,10 @@ namespace DNSmonitor.Models
         /// <summary>
         /// 构造函数
         /// </summary>
-        public Monitor()
+        public Monitor(ILogger<MonitorController> logger)
         {
+            _logger = logger;
+
             // IP数据包虽大长度为65536
             recv_buffer_length = 65536;
             recv_buffer = new byte[recv_buffer_length];
@@ -174,7 +179,8 @@ namespace DNSmonitor.Models
 
                 // uint src_addr = header->ip_srcaddr;
                 // uint dst_addr = header->ip_dstaddr;
-                Console.WriteLine(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
+                // Console.WriteLine(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
+                _logger.LogInformation(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
             }
         }
     }

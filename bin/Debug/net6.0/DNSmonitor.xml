@@ -254,7 +254,7 @@
             rawsocket监听线程
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.#ctor">
+        <member name="M:DNSmonitor.Models.Monitor.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.MonitorController})">
             <summary>
             构造函数
             </summary>

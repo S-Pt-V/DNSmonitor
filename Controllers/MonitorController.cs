@@ -23,7 +23,7 @@ namespace DNSmonitor.Controllers
         public MonitorController(ILogger<MonitorController> logger)
         {
             _logger = logger;
-            monitor = new Models.Monitor();
+            monitor = new Models.Monitor(_logger);
         }
 
         /// <summary>
