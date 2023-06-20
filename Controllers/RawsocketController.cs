@@ -61,7 +61,7 @@ namespace DNSmonitor.Controllers
         public ActionResult StartListen()
         {
             // rs.CreateAndBindSocket(ip);
-            rs.CreateAndBindSocket("10.200.1.158");
+            rs.CreateAndBindSocket("192.168.51.214");
             if (rs.ErrorOccured)
             {
                 return BadRequest("ErrorOccured");

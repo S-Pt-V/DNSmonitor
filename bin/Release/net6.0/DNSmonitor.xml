@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DNSmonitor</name>
+    </assembly>
+    <members>
+        <member name="T:DNSmonitor.Controllers.RawsocketController">
+            <summary>
+            Rawsocket 控制器
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Controllers.RawsocketController.rs">
+            <summary>
+            Rawsocket 对象
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Controllers.RawsocketController.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.RawsocketController},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="logger"></param>
+        </member>
+        <member name="M:DNSmonitor.Controllers.RawsocketController.GetNICAddr">
+            <summary>
+            获取本机所有网卡地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Controllers.RawsocketController.StartListen">
+            <summary>
+            开始监听
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:DNSmonitor.Models.PacketArrivedEventArgs">
+            <summary>
+            数据包到达事件
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.PacketArrivedEventArgs.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.Protocol">
+            <summary>
+            协议
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.DestinationPort">
+            <summary>
+            目的端口
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.OriginationPort">
+            <summary>
+            源端口
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.DestinationAddress">
+            <summary>
+            目的地址
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.OriginationAddress">
+            <summary>
+            源地址
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.IpVersion">
+            <summary>
+            IP协议版本
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.TotalPacketlength">
+            <summary>
+            数据包总长度
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.MessageLength">
+            <summary>
+            消息长度
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.HeaderLength">
+            <summary>
+            头部长度
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.ReceiveBuffer">
+            <summary>
+            接收缓冲区字节数组
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.HeaderBuffer">
+            <summary>
+            IP头部数据缓冲区
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.PacketArrivedEventArgs.MessageBuffer">
+            <summary>
+            消息缓冲区
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Headers">
+            <summary>
+            数据报头部定义
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Headers.IPHeader">
+            <summary>
+            IP协议头部
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_verlen">
+            <summary>
+            协议版本及首部长度。前4bit为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_tos">
+            <summary>
+            服务类型
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_totallength">
+            <summary>
+            总长度
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_id">
+            <summary>
+            ID
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_offset">
+            <summary>
+            分段偏移
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_ttl">
+            <summary>
+            生存周期
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_protocol">
+            <summary>
+            协议类型
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_checksum">
+            <summary>
+            校验和
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_srcaddr">
+            <summary>
+            源地址
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_dstaddr">
+            <summary>
+            目的地址
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Headers.TCP">
+            <summary>
+            TCP头部
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.srcport">
+            <summary>
+            源端口
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.dstport">
+            <summary>
+            目的端口
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.secquence">
+            <summary>
+            32位序号
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.ack">
+            <summary>
+            32位确认号
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.len_bits">
+            <summary>
+            前四位为头部长度，中间16位保留，后续依次为 URG，ACK，PSH，RST，SYN，FIN
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.windowsize">
+            <summary>
+            窗口大小
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.checksum">
+            <summary>
+            校验和
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.TCP.emergency_pointer">
+            <summary>
+            16位紧急指针
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Headers.UDP">
+            <summary>
+            UDP头部
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.UDP.srcport">
+            <summary>
+            源端口号
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.UDP.dstport">
+            <summary>
+            目的端口号
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.UDP.length">
+            <summary>
+            长度，包含头部和数据部分
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Headers.UDP.checksum">
+            <summary>
+            校验和
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Rawsocket">
+            <summary>
+            Rawsocket类定义
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket._logger">
+            <summary>
+            日志记录
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket.error_occured">
+            <summary>
+            是否有错误产生
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Rawsocket.ErrorOccured">
+            <summary>
+            是否有错误发生
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket.KeepRunning">
+            <summary>
+            是否继续运行
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket.len_receive_buf">
+            <summary>
+            接收数据长度
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket.receive_buf_bytes">
+            <summary>
+            接收数据的字节数组
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Rawsocket.socket">
+            <summary>
+            socket option 设置参数
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.RawsocketController})">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.CreateAndBindSocket(System.String)">
+            <summary>
+            创建并绑定套接字至指定IP地址
+            </summary>
+            <param name="IP">绑定的IP地址</param>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.SetSocketOption">
+            <summary>
+            设置具有IO控制功能的Socket
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.Run">
+            <summary>
+            运行RawSocket
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.CallReceive(System.IAsyncResult)">
+            <summary>
+            接收数据回调函数
+            </summary>
+            <param name="ar"></param>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.Receive(System.Byte[],System.Int32)">
+            <summary>
+            接收数据包
+            形成PacketArrivedEventArgs时间数据类对象，并引发PacketArrival事件
+            </summary>
+            <param name="buf">接收缓冲区</param>
+            <param name="len">接收数据长度</param>
+        </member>
+        <member name="T:DNSmonitor.Models.Rawsocket.PacketArrivedEventHandler">
+            <summary>
+            
+            </summary>
+            <param name="sender"></param>
+            <param name="args"></param>
+        </member>
+        <member name="E:DNSmonitor.Models.Rawsocket.PacketArrival">
+            <summary>
+            PacketArrival事件
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.OnPacketArrival(DNSmonitor.Models.PacketArrivedEventArgs)">
+            <summary>
+            PacketArrival事件的处理
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.Shutdown">
+            <summary>
+            关闭套接字
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,21 @@
+
+Date:2023-06-18 19:56:56.227 Exception:
+[Information]: Creating and binding rawsocket on: 192.168.51.214
+Date:2023-06-18 19:56:56.237 Exception:
+[Information]: Rawsocket created.
+Date:2023-06-18 19:56:56.238 Exception:
+[Information]: Rawsocket binded on 192.168.51.214
+Date:2023-06-18 19:56:56.239 Exception:
+[Information]: Set socket Option.
+Date:2023-06-18 19:56:56.240 Exception:
+[Information]: Socket option set.
+Date:2023-06-18 19:57:27.363 Exception:
+[Information]: Creating and binding rawsocket on: 192.168.51.214
+Date:2023-06-18 19:57:27.373 Exception:
+[Information]: Rawsocket created.
+Date:2023-06-18 19:57:27.374 Exception:
+[Information]: Rawsocket binded on 192.168.51.214
+Date:2023-06-18 19:57:27.375 Exception:
+[Information]: Set socket Option.
+Date:2023-06-18 19:57:27.375 Exception:
+[Information]: Socket option set.

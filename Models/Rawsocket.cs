@@ -14,9 +14,14 @@ namespace DNSmonitor.Models
     /// </summary>
     public class Rawsocket
     {
+        /// <summary>
+        /// 日志记录
+        /// </summary>
         private readonly ILogger<RawsocketController> _logger;
 
-        //是否有错误产生
+        /// <summary>
+        /// 是否有错误产生
+        /// </summary>
         private bool error_occured;
         /// <summary>
         /// 是否有错误发生
@@ -32,12 +37,18 @@ namespace DNSmonitor.Models
         /// 是否继续运行
         /// </summary>
         public bool KeepRunning;
-        //接收数据长度
+        /// <summary>
+        /// 接收数据长度
+        /// </summary>
         private static int len_receive_buf;
-        //接收数据的字节数组
+        /// <summary>
+        /// 接收数据的字节数组
+        /// </summary>
         byte[] receive_buf_bytes;
-        
-        //socket
+
+        /// <summary>
+        /// socket option 设置参数
+        /// </summary>
         private Socket? socket;
         const int SIO_R = unchecked((int)0x98000001);
         const int SIO_1 = unchecked((int)0x98000002);
@@ -51,7 +62,7 @@ namespace DNSmonitor.Models
             _logger = logger;
             KeepRunning = true;
             error_occured = false;
-            len_receive_buf = 131072;
+            len_receive_buf = 98304;
             receive_buf_bytes = new byte[len_receive_buf];
         }
 
@@ -82,12 +93,12 @@ namespace DNSmonitor.Models
                     error_occured = true;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
                 error_occured = true;
             }
-            
+
         }
 
         /// <summary>
@@ -100,7 +111,7 @@ namespace DNSmonitor.Models
             bool ret_value = true;
             try
             {
-                if(socket == null)
+                if (socket == null)
                 {
                     _logger.LogError("socket is null --SetSocketOption");
                     ret_value = false;
@@ -112,7 +123,7 @@ namespace DNSmonitor.Models
 
                 int ret_code = socket.IOControl(SIO_R, IN, OUT);
                 ret_code = OUT[0] + OUT[1] + OUT[2] + OUT[3];
-                if(ret_code != 0)
+                if (ret_code != 0)
                 {
                     _logger.LogError("ret_code not 0 --SetSocketOption");
                     ret_value = false;
@@ -134,22 +145,19 @@ namespace DNSmonitor.Models
         /// </summary>
         public void Run()
         {
-            // _logger.LogInformation("Run");
             if (socket == null)
             {
                 _logger.LogError("socket is null --Run");
+                return;
             }
-            else
+            try
             {
-                try
-                {
-                    // _logger.LogInformation("Run rawsocket.");
-                    IAsyncResult ar = socket.BeginReceive(receive_buf_bytes, 0, len_receive_buf, SocketFlags.None, new AsyncCallback(CallReceive), this);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.ToString());
-                }
+                IAsyncResult ar = socket.BeginReceive(receive_buf_bytes, 0, len_receive_buf, SocketFlags.None, new AsyncCallback(CallReceive), this);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                return;
             }
         }
 
@@ -166,10 +174,8 @@ namespace DNSmonitor.Models
                     _logger.LogError("socket is null --CallReceive");
                     return;
                 }
-                // _logger.LogInformation("CallReceive");
                 int received_bytes = 0;
                 received_bytes = socket.EndReceive(ar);
-                _logger.LogInformation(received_bytes.ToString());
                 Receive(receive_buf_bytes, received_bytes);
                 if (KeepRunning)
                 {
@@ -192,8 +198,6 @@ namespace DNSmonitor.Models
         /// <param name="len">接收数据长度</param>
         unsafe private void Receive(byte[] buf, int len)
         {
-            // _logger.LogInformation("Receive");
-
             byte temp_protocol = 0;
             uint temp_version = 0;
             uint temp_ip_srcaddr = 0;
@@ -251,13 +255,14 @@ namespace DNSmonitor.Models
 
                 e.TotalPacketlength = (uint)len;
                 e.MessageLength = (uint)len - e.HeaderLength;
-
+                
+                _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol + "\t" + len.ToString() + "Bytes"); 
+                
                 // 将首部数据和携带数据写入各自的缓存
                 e.ReceiveBuffer = buf;
                 Array.Copy(buf, 0, e.HeaderBuffer, 0, (int)e.HeaderLength);
                 Array.Copy(buf, (int)e.HeaderLength, e.MessageBuffer, 0, (int)e.MessageLength);
             }
-
             OnPacketArrival(e);
         }
 
@@ -287,7 +292,7 @@ namespace DNSmonitor.Models
                     PacketArrival(this, e);
                 }
                 // SystemStackOverflowException Here
-                _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
+                // _logger.LogInformation(e.OriginationAddress + ":" + e.OriginationPort + " -> " + e.DestinationAddress + ":" + e.DestinationPort + "\t" + e.Protocol);
             }
             catch(Exception ex)
             {
