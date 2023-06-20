@@ -4,14 +4,26 @@
         <name>DNSmonitor</name>
     </assembly>
     <members>
+        <member name="T:DNSmonitor.Controllers.MonitorController">
+            <summary>
+            API控制器
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Controllers.MonitorController.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.MonitorController})">
+            <summary>
+            构造函数
+            </summary>
+            <param name="logger"></param>
+        </member>
+        <member name="M:DNSmonitor.Controllers.MonitorController.Start">
+            <summary>
+            启动
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:DNSmonitor.Controllers.RawsocketController">
             <summary>
             Rawsocket 控制器
-            </summary>
-        </member>
-        <member name="F:DNSmonitor.Controllers.RawsocketController.rs">
-            <summary>
-            Rawsocket 对象
             </summary>
         </member>
         <member name="M:DNSmonitor.Controllers.RawsocketController.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.RawsocketController},Microsoft.Extensions.Configuration.IConfiguration)">
@@ -20,7 +32,7 @@
             </summary>
             <param name="logger"></param>
         </member>
-        <member name="M:DNSmonitor.Controllers.RawsocketController.GetNICAddr">
+        <member name="M:DNSmonitor.Controllers.RawsocketController.GetAllAddr">
             <summary>
             获取本机所有网卡地址
             </summary>
@@ -232,6 +244,46 @@
             校验和
             </summary>
         </member>
+        <member name="T:DNSmonitor.Models.Monitor">
+            <summary>
+            监视器类
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Monitor.Listener">
+            <summary>
+            rawsocket监听线程
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Monitor.Syslog">
+            <summary>
+            发送syslog的线程
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.Monitor.Control">
+            <summary>
+            监听，控制其余线程参数的线程
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.#ctor">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.Run">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.RawsocketSetup">
+            <summary>
+            原始套接字设置
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.RawsocketListen">
+            <summary>
+            原始套接字监听
+            </summary>
+        </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>
             Rawsocket类定义
@@ -242,34 +294,19 @@
             日志记录
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.error_occured">
-            <summary>
-            是否有错误产生
-            </summary>
-        </member>
         <member name="P:DNSmonitor.Models.Rawsocket.ErrorOccured">
             <summary>
             是否有错误发生
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.KeepRunning">
+        <member name="F:DNSmonitor.Models.Rawsocket.Listener">
             <summary>
-            是否继续运行
+            使用Rawsocket的监听线程
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.len_receive_buf">
+        <member name="F:DNSmonitor.Models.Rawsocket.Syslog">
             <summary>
-            接收数据长度
-            </summary>
-        </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.receive_buf_bytes">
-            <summary>
-            接收数据的字节数组
-            </summary>
-        </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.socket">
-            <summary>
-            socket option 设置参数
+            使用Udpsocket 发送 syslog 的线程
             </summary>
         </member>
         <member name="M:DNSmonitor.Models.Rawsocket.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.RawsocketController})">

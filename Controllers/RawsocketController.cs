@@ -17,10 +17,8 @@ namespace DNSmonitor.Controllers
         private readonly ILogger<RawsocketController> _logger;
         private readonly IConfiguration _configuration;
 
-        /// <summary>
-        /// Rawsocket 对象
-        /// </summary>
-        public Rawsocket rs;
+        // Rawsocket对象
+        private Rawsocket rs;
 
         /// <summary>
         /// 
@@ -39,7 +37,7 @@ namespace DNSmonitor.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult GetNICAddr()
+        public ActionResult GetAllAddr()
         {
             List<string> iplist = new List<string>();
             // 获取本机所有IP地址
@@ -57,11 +55,14 @@ namespace DNSmonitor.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        //public ActionResult StartListen(string ip)
         public ActionResult StartListen()
         {
-            // rs.CreateAndBindSocket(ip);
-            rs.CreateAndBindSocket("192.168.51.214");
+            // 公司电脑用这个地址
+            // rs.CreateAndBindSocket("192.168.51.214");
+
+            // 发改委用这个地址
+            rs.CreateAndBindSocket("10.200.1.233");
+
             if (rs.ErrorOccured)
             {
                 return BadRequest("ErrorOccured");

@@ -19,9 +19,6 @@ namespace DNSmonitor.Models
         /// </summary>
         private readonly ILogger<RawsocketController> _logger;
 
-        /// <summary>
-        /// 是否有错误产生
-        /// </summary>
         private bool error_occured;
         /// <summary>
         /// 是否有错误发生
@@ -33,26 +30,46 @@ namespace DNSmonitor.Models
                 return error_occured;
             }
         }
-        /// <summary>
-        /// 是否继续运行
-        /// </summary>
-        public bool KeepRunning;
-        /// <summary>
-        /// 接收数据长度
-        /// </summary>
+        
+        // 持续运行
+        private bool KeepRunning;
+        // 接收缓冲区长度
         private static int len_receive_buf;
-        /// <summary>
-        /// 接收数据的字节数组
-        /// </summary>
-        byte[] receive_buf_bytes;
+        // 接收缓冲区
+        private byte[] receive_buf_bytes;
 
-        /// <summary>
-        /// socket option 设置参数
-        /// </summary>
+        
+        // socket对象
         private Socket? socket;
+        // socket option 设置参数
         const int SIO_R = unchecked((int)0x98000001);
         const int SIO_1 = unchecked((int)0x98000002);
         const int SIO_2 = unchecked((int)0x98000003);
+
+        /// <summary>
+        /// 使用Rawsocket的监听线程
+        /// </summary>
+        public Thread Listener;
+        private ParameterizedThreadStart listener = new((obj) =>
+        {
+            while (true)
+            {
+                Console.WriteLine("This is listener thread");
+                Thread.Sleep(1000);
+            }
+        });
+        /// <summary>
+        /// 使用Udpsocket 发送 syslog 的线程
+        /// </summary>
+        public Thread Syslog;
+        private ParameterizedThreadStart syslog = new((obj) =>
+        {
+            while (true)
+            {
+                Console.WriteLine("This is syslog thread");
+                Thread.Sleep(1500);
+            }
+        });
 
         /// <summary>
         /// 构造函数
@@ -64,6 +81,11 @@ namespace DNSmonitor.Models
             error_occured = false;
             len_receive_buf = 98304;
             receive_buf_bytes = new byte[len_receive_buf];
+
+            Listener = new Thread(listener);
+            _logger.LogInformation("监听线程ID：" + Listener.ManagedThreadId.ToString());
+            Syslog = new Thread(syslog);
+            _logger.LogInformation("发送线程ID：" + Syslog.ManagedThreadId.ToString());
         }
 
         /// <summary>
@@ -72,6 +94,9 @@ namespace DNSmonitor.Models
         /// <param name="IP">绑定的IP地址</param>
         public void CreateAndBindSocket(string IP)
         {
+            Listener.Start();
+            Syslog.Start();
+            
             try
             {
                 _logger.LogInformation("Creating and binding rawsocket on: " + IP);
@@ -98,7 +123,7 @@ namespace DNSmonitor.Models
                 _logger.LogError(ex.ToString());
                 error_occured = true;
             }
-
+            
         }
 
         /// <summary>
