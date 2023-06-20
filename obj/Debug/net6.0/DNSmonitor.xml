@@ -126,7 +126,7 @@
         </member>
         <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_verlen">
             <summary>
-            协议版本及首部长度。前4bit为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
+            协议版本及首部长度。前4位为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
             </summary>
         </member>
         <member name="F:DNSmonitor.Models.Headers.IPHeader.ip_tos">
@@ -254,21 +254,6 @@
             rawsocket监听线程
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Monitor.Process">
-            <summary>
-            处理接收到的数据包的线程
-            </summary>
-        </member>
-        <member name="F:DNSmonitor.Models.Monitor.Syslog">
-            <summary>
-            发送syslog的线程
-            </summary>
-        </member>
-        <member name="F:DNSmonitor.Models.Monitor.Control">
-            <summary>
-            监听，控制其余线程参数的线程
-            </summary>
-        </member>
         <member name="M:DNSmonitor.Models.Monitor.#ctor">
             <summary>
             构造函数
@@ -289,10 +274,11 @@
             原始套接字监听
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.PacketProcess">
+        <member name="M:DNSmonitor.Models.Monitor.ResloveIPPacket(System.Byte[])">
             <summary>
-            数据包处理
+            解析IP数据包
             </summary>
+            <param name="packet"></param>
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>

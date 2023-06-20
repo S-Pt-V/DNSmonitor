@@ -14,7 +14,7 @@ namespace DNSmonitor.Models
         public struct IPHeader
         {
             /// <summary>
-            /// 协议版本及首部长度。前4bit为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
+            /// 协议版本及首部长度。前4位为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
             /// </summary>
             [FieldOffset(0)] public byte ip_verlen;
             /// <summary>
