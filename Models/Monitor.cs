@@ -130,8 +130,6 @@ namespace DNSmonitor.Models
                     byte[] packet = new byte[recved];
                     Array.Copy(recv_buffer, 0, packet, 0, recved);
                     ResloveIPPacket(packet);
-                    // packets.Add(packet);
-                    // Console.WriteLine(packets.Count.ToString());
                 }
             }
         }
@@ -142,45 +140,45 @@ namespace DNSmonitor.Models
         /// <param name="packet"></param>
         unsafe private void ResloveIPPacket(byte[] packet)
         {
+            IPPacket ip_packet = new IPPacket();
             fixed (byte* fixed_buf = packet)
             {
                 IPHeader* header = (IPHeader*)fixed_buf;
-                uint version = (uint)(header->ip_verlen & 0xF0) >> 4;
-                uint length = (uint)(header->ip_verlen & 0x0F) << 2;
-                byte tos = (byte)header->ip_tos;
-                ushort totallength = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
-                ushort identification = (ushort)header->ip_id;
-                ushort offset = (ushort)header->ip_offset;
-                byte ttl = (byte)header->ip_ttl;
+                ip_packet.version = (uint)(header->ip_verlen & 0xF0) >> 4;
+                ip_packet.headerlength = (uint)(header->ip_verlen & 0x0F) << 2;
+                ip_packet.tos = (byte)header->ip_tos;
+                ip_packet.totallength = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
+                ip_packet.identification = (ushort)header->ip_id;
+                ip_packet.offset = (ushort)header->ip_offset;
+                ip_packet.ttl = (byte)header->ip_ttl;
                 byte protocol_byte = (byte)header->ip_protocol;
-                ushort checksum = (ushort)header->ip_checksum;
-                string src_addr = new IPAddress(header->ip_srcaddr).ToString();
-                string dst_addr = new IPAddress(header->ip_dstaddr).ToString();
-
-                string protocol = "";
+                ip_packet.checksum = (ushort)header->ip_checksum;
+                ip_packet.src_addr = new IPAddress(header->ip_srcaddr).ToString();
+                ip_packet.dst_addr = new IPAddress(header->ip_dstaddr).ToString();
+                
                 switch (protocol_byte)
                 {
                     case 1:
-                        protocol = "ICMP";
+                        ip_packet.protocol = "ICMP";
                         break;
                     case 2:
-                        protocol = "IGMP";
+                        ip_packet.protocol = "IGMP";
                         break;
                     case 6:
-                        protocol = "TCP";
+                        ip_packet.protocol = "TCP";
                         break;
                     case 17:
-                        protocol = "UDP";
+                        ip_packet.protocol = "UDP";
                         break;
                     default:
-                        protocol = "UNKONOWN";
+                        ip_packet.protocol = "UNKONOWN";
                         break;
                 }
 
-                // uint src_addr = header->ip_srcaddr;
-                // uint dst_addr = header->ip_dstaddr;
-                // Console.WriteLine(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
-                _logger.LogInformation(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
+                byte[] data = new byte[ip_packet.totallength - ip_packet.headerlength];
+                Array.Copy(packet, ip_packet.headerlength, data, 0, ip_packet.totallength - ip_packet.headerlength);
+
+                // _logger.LogInformation(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
             }
         }
     }
