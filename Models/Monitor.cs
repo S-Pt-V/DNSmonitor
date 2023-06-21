@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using static DNSmonitor.Models.Headers;
 
 namespace DNSmonitor.Models
@@ -221,18 +222,30 @@ namespace DNSmonitor.Models
         /// <param name="packet"></param>
         unsafe private void UDPresolve(IPPacket packet)
         {
-            UDPdatagram datagram = new UDPdatagram();
+            UDPdatagram udpdatagram = new UDPdatagram();
             fixed (byte* fixed_buf = packet.data)
             {
                 UDPHeader* udpheader = (UDPHeader*)fixed_buf;
-                datagram.srcport = (ushort)(fixed_buf[0] * 256 + fixed_buf[1]);
-                datagram.dstport = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
-                datagram.length = (ushort)(fixed_buf[4] * 256 + fixed_buf[5]);
-                datagram.checksum = (ushort)(fixed_buf[6] * 256 + fixed_buf[7]);
-                datagram.datagram = new byte[packet.data.Length - 8];
-                Array.Copy(packet.data, 8, datagram.datagram, 0, packet.data.Length - 8);
-                _logger.LogInformation("UDP: " + packet.src_addr + ":" + datagram.srcport.ToString() + "\t" + packet.dst_addr + ":" + datagram.dstport.ToString() + "\t" + datagram.datagram.Length + "Bytes");
-                // _logger.LogInformation("UDP\t" + packet.src_addr + ":" + srcport.ToString() + "\t->\t" + packet.dst_addr + ":" + dstport.ToString());
+                udpdatagram.srcport = (ushort)(fixed_buf[0] * 256 + fixed_buf[1]);
+                udpdatagram.dstport = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
+                udpdatagram.length = (ushort)(fixed_buf[4] * 256 + fixed_buf[5]);
+                udpdatagram.checksum = (ushort)(fixed_buf[6] * 256 + fixed_buf[7]);
+                udpdatagram.datagram = new byte[packet.data.Length - 8];
+                Array.Copy(packet.data, 8, udpdatagram.datagram, 0, packet.data.Length - 8);
+                // _logger.LogInformation("UDP: " + packet.src_addr + ":" + udpdatagram.srcport.ToString() + "\t" + packet.dst_addr + ":" + udpdatagram.dstport.ToString() + "\t" + datagram.datagram.Length + "Bytes");
+                DNSfilter(udpdatagram);
+            }
+        }
+
+        /// <summary>
+        /// 过滤DNS相关数据
+        /// </summary>
+        private void DNSfilter(UDPdatagram udpdatagram)
+        {
+            if(udpdatagram.srcport == 53 || udpdatagram.dstport == 53)
+            {
+                _logger.LogInformation(BitConverter.ToString(udpdatagram.datagram));
+                _logger.LogInformation(Encoding.ASCII.GetString(udpdatagram.datagram));
             }
         }
     }

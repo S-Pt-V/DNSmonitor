@@ -387,6 +387,11 @@
             </summary>
             <param name="packet"></param>
         </member>
+        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.UDPdatagram)">
+            <summary>
+            过滤DNS相关数据
+            </summary>
+        </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>
             Rawsocket类定义
