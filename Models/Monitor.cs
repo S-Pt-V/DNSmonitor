@@ -1,5 +1,6 @@
 ﻿using DNSmonitor.Controllers;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 using static DNSmonitor.Models.Headers;
@@ -126,10 +127,11 @@ namespace DNSmonitor.Models
                 if (rawsocket != null)
                 {
                     int recved = rawsocket.Receive(recv_buffer);
-                    Console.WriteLine("recved " + recved.ToString() + " bytes");
+                    // _logger.LogInformation(recved.ToString() + " bytes received");
                     byte[] packet = new byte[recved];
                     Array.Copy(recv_buffer, 0, packet, 0, recved);
-                    ResloveIPPacket(packet);
+                    ResloveIPPacket(packet, recved);
+                    // _logger.LogInformation(BitConverter.ToString(packet));
                 }
             }
         }
@@ -138,7 +140,7 @@ namespace DNSmonitor.Models
         /// 解析IP数据包
         /// </summary>
         /// <param name="packet"></param>
-        unsafe private void ResloveIPPacket(byte[] packet)
+        unsafe private void ResloveIPPacket(byte[] packet, int recved)
         {
             IPPacket ip_packet = new IPPacket();
             fixed (byte* fixed_buf = packet)
@@ -155,6 +157,23 @@ namespace DNSmonitor.Models
                 ip_packet.checksum = (ushort)header->ip_checksum;
                 ip_packet.src_addr = new IPAddress(header->ip_srcaddr).ToString();
                 ip_packet.dst_addr = new IPAddress(header->ip_dstaddr).ToString();
+
+                try
+                {
+                    // _logger.LogInformation(ip_packet.headerlength.ToString() + "\t" + ip_packet.totallength.ToString());
+                    // _logger.LogInformation(protocol_byte.ToString() + "\t" + fixed_buf[2].ToString() + "\t" + fixed_buf[3].ToString());
+                    // ip_packet.data = new byte[ip_packet.totallength - ip_packet.headerlength];
+                    ip_packet.data = new byte[recved - ip_packet.headerlength];
+                    Array.Copy(packet, ip_packet.headerlength, ip_packet.data, 0, recved - ip_packet.headerlength);
+                }
+                catch(Exception e)
+                {
+                    _logger.LogError(e.ToString());
+                    string packetstring = BitConverter.ToString(packet);
+                    _logger.LogError(packetstring);
+                    return;
+                }
+                
                 
                 switch (protocol_byte)
                 {
@@ -166,19 +185,54 @@ namespace DNSmonitor.Models
                         break;
                     case 6:
                         ip_packet.protocol = "TCP";
+                        TCPresolve(ip_packet);
                         break;
                     case 17:
                         ip_packet.protocol = "UDP";
+                        UDPresolve(ip_packet);
                         break;
                     default:
                         ip_packet.protocol = "UNKONOWN";
                         break;
                 }
-
-                byte[] data = new byte[ip_packet.totallength - ip_packet.headerlength];
-                Array.Copy(packet, ip_packet.headerlength, data, 0, ip_packet.totallength - ip_packet.headerlength);
-
                 // _logger.LogInformation(src_addr + " to " + dst_addr + " " + protocol + " " + totallength.ToString());
+            }
+        }
+
+        /// <summary>
+        /// TCP数据包解析
+        /// </summary>
+        /// <param name="packet"></param>
+        unsafe private void TCPresolve(IPPacket packet)
+        {
+            fixed(byte* fixed_buf = packet.data)
+            {
+                TCPHeader* tcpheader = (TCPHeader*)fixed_buf;
+                ushort srcport = (ushort)(fixed_buf[0] * 256 + fixed_buf[1]);
+                ushort dstport = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
+                // _logger.LogInformation("TCP\t" + packet.src_addr + ":" + srcport.ToString() + "\t->\t" + packet.dst_addr + ":" + dstport.ToString());
+            }
+            // _logger.LogInformation("TCP\t" + packet.headerlength.ToString() + "\t" + packet.data.Length.ToString());
+        }
+
+        /// <summary>
+        /// UDP数据包解析
+        /// </summary>
+        /// <param name="packet"></param>
+        unsafe private void UDPresolve(IPPacket packet)
+        {
+            UDPdatagram datagram = new UDPdatagram();
+            fixed (byte* fixed_buf = packet.data)
+            {
+                UDPHeader* udpheader = (UDPHeader*)fixed_buf;
+                datagram.srcport = (ushort)(fixed_buf[0] * 256 + fixed_buf[1]);
+                datagram.dstport = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
+                datagram.length = (ushort)(fixed_buf[4] * 256 + fixed_buf[5]);
+                datagram.checksum = (ushort)(fixed_buf[6] * 256 + fixed_buf[7]);
+                datagram.datagram = new byte[packet.data.Length - 8];
+                Array.Copy(packet.data, 8, datagram.datagram, 0, packet.data.Length - 8);
+                _logger.LogInformation("UDP: " + packet.src_addr + ":" + datagram.srcport.ToString() + "\t" + packet.dst_addr + ":" + datagram.dstport.ToString() + "\t" + datagram.datagram.Length + "Bytes");
+                // _logger.LogInformation("UDP\t" + packet.src_addr + ":" + srcport.ToString() + "\t->\t" + packet.dst_addr + ":" + dstport.ToString());
             }
         }
     }

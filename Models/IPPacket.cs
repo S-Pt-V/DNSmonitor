@@ -54,4 +54,31 @@
         /// </summary>
         public byte[] data { get; set; }
     }
+
+    /// <summary>
+    /// UDP数据报
+    /// </summary>
+    public class UDPdatagram
+    {
+        /// <summary>
+        /// 源端口
+        /// </summary>
+        public ushort srcport { get; set; }
+        /// <summary>
+        /// 目的端口
+        /// </summary>
+        public ushort dstport { get; set; }
+        /// <summary>
+        /// 总长度
+        /// </summary>
+        public ushort length { get; set; }
+        /// <summary>
+        /// 校验和
+        /// </summary>
+        public ushort checksum { get; set; }
+        /// <summary>
+        /// 数据部分
+        /// </summary>
+        public byte[] datagram { get; set; }
+    }
 }

@@ -59,7 +59,7 @@ namespace DNSmonitor.Models
         /// TCP头部
         /// </summary>
         [StructLayout(LayoutKind.Explicit)]
-        public struct TCP
+        public struct TCPHeader
         {
             /// <summary>
             /// 源端口
@@ -99,7 +99,7 @@ namespace DNSmonitor.Models
         /// UDP头部
         /// </summary>
         [StructLayout(LayoutKind.Explicit)]
-        public struct UDP
+        public struct UDPHeader
         {
             /// <summary>
             /// 源端口号
