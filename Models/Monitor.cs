@@ -307,15 +307,38 @@ namespace DNSmonitor.Models
                         Array.Copy(datagram, index + 1, temp, 0, length);
                         identificators.Add(temp);
                     }
-
+                    /*
                     foreach (byte[] identificator in identificators)
                     {
                         _logger.LogInformation(Encoding.ASCII.GetString(identificator));
                     }
-
-                    _logger.LogInformation("请求类型：" + ((int)(datagram[index + 1] * 256 + datagram[index + 2])).ToString());
+                    */
+                    //_logger.LogInformation("请求类型：" + ((int)(datagram[index + 1] * 256 + datagram[index + 2])).ToString() + "\t查询类：" + ((int)(datagram[index + 3] * 256 + datagram[index + 4])).ToString());
 
                     // 回答
+
+                    if(dns.QR == 1)
+                    {
+                        List<byte[]> answers = new List<Byte[]>();
+                        index += 5;
+                        length = 0;
+                        for(index += 5; index < datagram.Length; index += length + 1)
+                        {
+                            length = datagram[index];
+                            if(length == 0)
+                            {
+                                _logger.LogInformation("Answer end");
+                                break;
+                            }
+                            byte[] temp = new byte[length];
+                            Array.Copy(datagram, index + 1, temp, 0, length);
+                            answers.Add(temp);
+                        }
+                        foreach (byte[] identificator in answers)
+                        {
+                            _logger.LogInformation(Encoding.ASCII.GetString(identificator));
+                        }
+                    }
 
                     // 授权
 
