@@ -44,6 +44,81 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:DNSmonitor.Models.DNSdatagram">
+            <summary>
+            DNS数据包结构
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.identification">
+            <summary>
+            两字节长度数据包唯一标识
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.QR">
+            <summary>
+            0b1xxxxxxx xxxxxxxx 第一位为0:query或者1:response
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.opcode">
+            <summary>
+            0bx1111xxx xxxxxxxx 操作码，0:标准查询，1:反向查询，2:服务器状态请求
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.AA">
+            <summary>
+            0bxxxxx1xx xxxxxxxx AA表示授权回答，默认为0
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.TC">
+            <summary>
+            0bxxxxxx1x xxxxxxxx TC是否可截断，使用UDP时表示应答长度超过512字节只返回前512字节
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.RD">
+            <summary>
+            0bxxxxxxx1 xxxxxxxx RD 期望递归请求。一般由请求端发送。若为1，服务器必须处理该请求。若为0，且请求的DNS没有一个授权回答，就返回一个能够解答这种查询的其他DNS列表，称为迭代查询
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.RA">
+            <summary>
+            0bxxxxxxxx 1xxxxxxx RA 表示可用递归。是RD的响应。大部分DNS都可以响应RD，除了少部分根服务器。
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.zeros">
+            <summary>
+            0bxxxxxxxx x111xxxx zeros 这三位必须为0
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.rcode">
+            <summary>
+            0bxxxxxxxx xxxx1111 rcode 0:没有差错，3：名字有错，表示查询中指定的域名不存在
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.questionnum">
+            <summary>
+            两字节问题数
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.resource_record_num">
+            <summary>
+            两字节资源记录数
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.authresource_record_num">
+            <summary>
+            两字节授权资源记录数
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.extraresource_record_num">
+            <summary>
+            两字节额外资源记录数
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.DNSdatagram.question">
+            <summary>
+            查询问题
+            </summary>
+        </member>
         <member name="T:DNSmonitor.Models.PacketArrivedEventArgs">
             <summary>
             数据包到达事件
@@ -387,7 +462,7 @@
             </summary>
             <param name="packet"></param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.UDPdatagram)">
+        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram)">
             <summary>
             过滤DNS相关数据
             </summary>

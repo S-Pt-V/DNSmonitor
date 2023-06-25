@@ -16,7 +16,7 @@ namespace DNSmonitor.Models
         private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        const string IP = "10.200.1.233";
+        const string IP = "10.200.1.66";
 
         // 接收缓冲区长度
         private int recv_buffer_length;
@@ -75,7 +75,7 @@ namespace DNSmonitor.Models
         public void Run()
         {
             Listener.Start();
-            Console.WriteLine("Thread Listener started: " + Listener.ManagedThreadId.ToString());
+            _logger.LogInformation("Thread Listener started: " + Listener.ManagedThreadId.ToString());
         }
 
         /// <summary>
@@ -88,14 +88,14 @@ namespace DNSmonitor.Models
                 // 创建rawsocket
                 rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
                 // rawsocket.Blocking = false;
-                Console.WriteLine("Rawsocket created.");
+                _logger.LogInformation("Rawsocket created.");
                 
                 // socket绑定到IP终结点
                 rawsocket.Bind(new IPEndPoint(IPAddress.Parse(IP), 0));
-                Console.WriteLine("Rawsocket binded on " + IP);
+                _logger.LogInformation("Rawsocket binded on " + IP);
 
                 // 设置Rawsocket功能
-                Console.WriteLine("Set socket Option.");
+                _logger.LogInformation("Set socket Option.");
                 rawsocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, 1);
                 byte[] IN = new byte[4] { 1, 0, 0, 0 };
                 byte[] OUT = new byte[4];
@@ -104,16 +104,16 @@ namespace DNSmonitor.Models
                 ret_code = OUT[0] + OUT[1] + OUT[2] + OUT[3];
                 if (ret_code != 0)
                 {
-                    Console.WriteLine("ret_code not 0 --SetSocketOption");
+                    _logger.LogError("ret_code not 0 --SetSocketOption");
                     return false;
                 }
-                Console.WriteLine("Socket option set.");
+                _logger.LogInformation("Socket option set.");
                 
                 return true;
             }
             catch(Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
                 return false;
             }
         }
@@ -233,19 +233,98 @@ namespace DNSmonitor.Models
                 udpdatagram.datagram = new byte[packet.data.Length - 8];
                 Array.Copy(packet.data, 8, udpdatagram.datagram, 0, packet.data.Length - 8);
                 // _logger.LogInformation("UDP: " + packet.src_addr + ":" + udpdatagram.srcport.ToString() + "\t" + packet.dst_addr + ":" + udpdatagram.dstport.ToString() + "\t" + datagram.datagram.Length + "Bytes");
-                DNSfilter(udpdatagram);
+                DNSfilter(packet, udpdatagram);
             }
         }
 
         /// <summary>
         /// 过滤DNS相关数据
         /// </summary>
-        private void DNSfilter(UDPdatagram udpdatagram)
+        unsafe private void DNSfilter(IPPacket packet, UDPdatagram udpdatagram)
         {
-            if(udpdatagram.srcport == 53 || udpdatagram.dstport == 53)
+            try
             {
-                _logger.LogInformation(BitConverter.ToString(udpdatagram.datagram));
-                _logger.LogInformation(Encoding.ASCII.GetString(udpdatagram.datagram));
+                // 筛选源或目的端口为53的数据，可能是DNS请求和响应
+                if (udpdatagram.srcport == 53 || udpdatagram.dstport == 53)
+                {
+                    // 复制udp数据报中的数据部分
+                    byte[] datagram = new byte[udpdatagram.datagram.Length];
+                    Array.Copy(udpdatagram.datagram, 0, datagram, 0, udpdatagram.datagram.Length);
+                    _logger.LogInformation("数据包总长度： " + datagram.Length.ToString() + " Bytes");
+                    _logger.LogInformation(BitConverter.ToString(datagram));
+
+                    DNSdatagram dns = new DNSdatagram();
+
+                    // 12字节首部
+                    // 前两字节为标识
+                    dns.identification = (ushort)(datagram[0] * 256 + datagram[1]);
+                    // 二、三字节为各个标志位
+                    dns.QR = (datagram[2] & 0b10000000) >> 7;
+                    dns.opcode = (datagram[2] & 0b01111000) >> 3;
+                    dns.AA = (datagram[2] & 0b00000100) >> 2;
+                    dns.TC = (datagram[2] & 0b00000010) >> 1;
+                    dns.RD = (datagram[2] & 0b00000001);
+                    dns.RA = (datagram[3] & 0b10000000) >> 7;
+                    dns.zeros = (datagram[3] & 0b01110000) >> 4;
+                    dns.rcode = (datagram[3] & 0b00001111);
+                    // _logger.LogInformation("原始数据: " + BitConverter.ToString(datagram, 2, 1) + "\t与运算: " + (datagram[2] & 0b10000000).ToString() + "\tQR: " + ((datagram[2] & 0b10000000) >> 7).ToString());
+                    switch (dns.QR)
+                    {
+                        case 0:
+                            _logger.LogInformation("DNS请求\t" + packet.src_addr + "->" + packet.dst_addr);
+                            break;
+                        case 1:
+                            _logger.LogInformation("DNS响应\t" + packet.src_addr + "->" + packet.dst_addr);
+                            break;
+                        default:
+                            _logger.LogError("数据类型未知");
+                            break;
+                    }
+                    //问题数
+                    dns.questionnum = datagram[4] * 256 + datagram[5];
+                    //资源记录数
+                    dns.resource_record_num = datagram[6] * 256 + datagram[7];
+                    //授权资源记录数
+                    dns.authresource_record_num = datagram[8] * 256 + datagram[9];
+                    //额外资源记录数
+                    dns.extraresource_record_num = datagram[10] * 256 + datagram[11];
+                    _logger.LogInformation("问题数：" + dns.questionnum.ToString() + "\t资源记录数：" + dns.resource_record_num.ToString() + "\t授权资源记录数：" + dns.authresource_record_num.ToString() + "\t额外资源记录数：" + dns.extraresource_record_num.ToString());
+
+                    // 问题部分
+                    List<byte[]> identificators = new List<byte[]>();
+                    int length = 0;
+                    int index = 0;
+                    for (index = 12; index < datagram.Length; index += length + 1)
+                    {
+                        length = datagram[index];
+                        // _logger.LogInformation("datagram index: " + index.ToString() + "\t" + "identificator length: " + length.ToString());
+                        if (length == 0)
+                        {
+                            // _logger.LogInformation("Root identificator detected");
+                            break;
+                        }
+                        byte[] temp = new byte[length];
+                        Array.Copy(datagram, index + 1, temp, 0, length);
+                        identificators.Add(temp);
+                    }
+
+                    foreach (byte[] identificator in identificators)
+                    {
+                        _logger.LogInformation(Encoding.ASCII.GetString(identificator));
+                    }
+
+                    _logger.LogInformation("请求类型：" + ((int)(datagram[index + 1] * 256 + datagram[index + 2])).ToString());
+
+                    // 回答
+
+                    // 授权
+
+                    // 额外信息
+                }
+            }
+            catch(Exception e)
+            {
+                _logger.LogError(e.ToString());
             }
         }
     }
