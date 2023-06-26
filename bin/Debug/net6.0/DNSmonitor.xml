@@ -15,9 +15,27 @@
             </summary>
             <param name="logger"></param>
         </member>
+        <member name="M:DNSmonitor.Controllers.MonitorController.GetAllAddr">
+            <summary>
+            获取本机所有网卡地址
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:DNSmonitor.Controllers.MonitorController.Start">
             <summary>
             启动
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Controllers.MonitorController.Stop">
+            <summary>
+            停止监听
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Controllers.MonitorController.State">
+            <summary>
+            获取状态
             </summary>
             <returns></returns>
         </member>
@@ -431,7 +449,12 @@
         </member>
         <member name="M:DNSmonitor.Models.Monitor.Run">
             <summary>
-            
+            启动监听器
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.Stop">
+            <summary>
+            停止监听器
             </summary>
         </member>
         <member name="M:DNSmonitor.Models.Monitor.RawsocketSetup">
@@ -448,7 +471,8 @@
             <summary>
             解析IP数据包
             </summary>
-            <param name="packet"></param>
+            <param name="packet">IP数据包的字节数组</param>
+            <param name="recved">数据包长度</param>
         </member>
         <member name="M:DNSmonitor.Models.Monitor.TCPresolve(DNSmonitor.Models.IPPacket)">
             <summary>
@@ -456,13 +480,13 @@
             </summary>
             <param name="packet"></param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.UDPresolve(DNSmonitor.Models.IPPacket)">
+        <member name="M:DNSmonitor.Models.Monitor.UDPresolve(DNSmonitor.Models.IPPacket,System.Byte[])">
             <summary>
             UDP数据包解析
             </summary>
             <param name="packet"></param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram)">
+        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram,System.Byte[])">
             <summary>
             过滤DNS相关数据
             </summary>

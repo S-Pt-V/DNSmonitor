@@ -71,6 +71,8 @@ builder.Services.AddCors(options =>
 });
 #endregion
 
+builder.Services.AddSingleton<DNSmonitor.Models.Monitor>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
