@@ -457,7 +457,7 @@
             停止监听器
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.RawsocketSetup">
+        <member name="M:DNSmonitor.Models.Monitor.SocketSetup">
             <summary>
             原始套接字设置
             </summary>

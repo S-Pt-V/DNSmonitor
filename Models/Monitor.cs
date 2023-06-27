@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using static DNSmonitor.Models.Headers;
 
@@ -18,18 +19,23 @@ namespace DNSmonitor.Models
         // 监听用的IP
         const string IP = "10.200.1.66";
         // const string IP = "59.220.240.2";
-
         // 接收缓冲区长度
         private int recv_buffer_length;
         // 接收缓冲区
         private byte[] recv_buffer;
-
         // 原始套接字，用于监听TCP、UDP数据包
-        private Socket? rawsocket;
+        private Socket rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
         // 原始套接字设置参数
         const int SIO_R = unchecked((int)0x98000001);
         const int SIO_1 = unchecked((int)0x98000002);
         const int SIO_2 = unchecked((int)0x98000003);
+
+        // UDP套接字
+        private Socket udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        // 服务器IP
+        private const string syslog_ip ="59.220.216.129";
+        private const int syslog_port = 514;
+        private IPEndPoint syslog_endpoint = new IPEndPoint(IPAddress.Parse(syslog_ip), syslog_port);
 
         /// <summary>
         /// rawsocket监听线程
@@ -52,7 +58,7 @@ namespace DNSmonitor.Models
             keeplistening = true;
             ParameterizedThreadStart? ListenerStart = new((obj) =>
             {
-                if (!RawsocketSetup())
+                if (!SocketSetup())
                 {
                     _logger.LogError("rawsocket setup failed.");
                     return;
@@ -91,14 +97,15 @@ namespace DNSmonitor.Models
         /// <summary>
         /// 原始套接字设置
         /// </summary>
-        public bool RawsocketSetup()
+        public bool SocketSetup()
         {
             try
             {
+                //**************************************************************************************
                 // 创建rawsocket
-                rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
+                // rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
                 // rawsocket.Blocking = false;
-                _logger.LogInformation("Rawsocket created.");
+                // _logger.LogInformation("Rawsocket created.");
 
                 // socket绑定到IP终结点
                 rawsocket.Bind(new IPEndPoint(IPAddress.Parse(IP), 0));
@@ -119,7 +126,11 @@ namespace DNSmonitor.Models
                     return false;
                 }
                 _logger.LogInformation("Socket option set.");
-                
+                //**************************************************************************************
+                // udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                // _logger.LogInformation("Udpsocket created");
+                udpsocket.Bind(new IPEndPoint(IPAddress.Any, 55144));
+                // _logger.LogInformation("Udpsocket binded");
                 return true;
             }
             catch(Exception e)
@@ -266,11 +277,12 @@ namespace DNSmonitor.Models
                 // 筛选源或目的端口为53的数据，可能是DNS请求和响应
                 if (udpdatagram.srcport == 53 || udpdatagram.dstport == 53)
                 {
-                    _logger.LogInformation(BitConverter.ToString(origionalpacket));
-
+                    // _logger.LogInformation(BitConverter.ToString(origionalpacket));
+                    _logger.LogInformation(origionalpacket.Length.ToString());
                     // 直接从UDP端口转发
+                    udpsocket.SendTo(origionalpacket, origionalpacket.Length, SocketFlags.None, syslog_endpoint);
 
-
+                    #region comment
                     /*
                     // 复制udp数据报中的数据部分
                     byte[] datagram = new byte[udpdatagram.datagram.Length];
@@ -369,6 +381,7 @@ namespace DNSmonitor.Models
                     // 授权
                     // 额外信息
                     */
+                    #endregion
                 }
             }
             catch(Exception e)
