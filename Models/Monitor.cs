@@ -26,8 +26,6 @@ namespace DNSmonitor.Models
 
         // 原始套接字，用于监听TCP、UDP数据包
         private Socket? rawsocket;
-        // 普通套接字用于绑定UDPsocket，用于发送syslog数据
-        private Socket? udpsocket;
         // 原始套接字设置参数
         const int SIO_R = unchecked((int)0x98000001);
         const int SIO_1 = unchecked((int)0x98000002);
