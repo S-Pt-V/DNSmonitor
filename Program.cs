@@ -71,7 +71,7 @@ builder.Services.AddCors(options =>
 });
 #endregion
 
-builder.Services.AddSingleton<DNSmonitor.Models.Monitor>();
+// builder.Services.AddSingleton<DNSmonitor.Models.Monitor>();
 
 var app = builder.Build();
 
@@ -81,6 +81,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

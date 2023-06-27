@@ -114,3 +114,7 @@ D:\Projects\8-DNSmonitor\DNSmonitor\obj\Release\net6.0\DNSmonitor.xml
 D:\Projects\8-DNSmonitor\DNSmonitor\obj\Release\net6.0\DNSmonitor.pdb
 D:\Projects\8-DNSmonitor\DNSmonitor\obj\Release\net6.0\DNSmonitor.genruntimeconfig.cache
 D:\Projects\8-DNSmonitor\DNSmonitor\obj\Release\net6.0\ref\DNSmonitor.dll
+D:\Projects\8-DNSmonitor\DNSmonitor\bin\Release\net6.0\dnsmonitor_ui\jsconfig.json
+D:\Projects\8-DNSmonitor\DNSmonitor\bin\Release\net6.0\dnsmonitor_ui\package-lock.json
+D:\Projects\8-DNSmonitor\DNSmonitor\bin\Release\net6.0\dnsmonitor_ui\package.json
+D:\Projects\8-DNSmonitor\DNSmonitor\bin\Release\net6.0\DNSmonitor.staticwebassets.runtime.json

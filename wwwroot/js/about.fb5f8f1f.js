@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkdnsmonitor_ui"]=self["webpackChunkdnsmonitor_ui"]||[]).push([[443],{5399:function(n,t,u){u.r(t),u.d(t,{default:function(){return l}});var s=function(){var n=this;n._self._c;return n._m(0)},i=[function(){var n=this,t=n._self._c;return t("div",{staticClass:"about"},[t("h1",[n._v("This is an about page")])])}],r=u(1001),e={},a=(0,r.Z)(e,s,i,!1,null,null,null),l=a.exports}}]);
+//# sourceMappingURL=about.fb5f8f1f.js.map
