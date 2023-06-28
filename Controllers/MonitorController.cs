@@ -13,7 +13,7 @@ namespace DNSmonitor.Controllers
     public class MonitorController : ControllerBase
     {
         // 日志记录组件
-        private readonly ILogger<MonitorController> _logger;
+        // private readonly ILogger<MonitorController> _logger;
 
         private Models.Monitor monitor;
 
@@ -21,10 +21,12 @@ namespace DNSmonitor.Controllers
         /// 构造函数
         /// </summary>
         /// <param name="logger"></param>
-        public MonitorController(ILogger<MonitorController> logger)
+        //public MonitorController(ILogger<MonitorController> logger)
+        public MonitorController()
         {
-            _logger = logger;
-            monitor = new Models.Monitor(_logger);
+            // _logger = logger;
+            // monitor = new Models.Monitor(_logger);
+            monitor = new Models.Monitor();
         }
 
         /// <summary>
@@ -52,7 +54,8 @@ namespace DNSmonitor.Controllers
         [HttpPost]
         public ActionResult Start()
         {
-            _logger.LogInformation("Start");
+            // _logger.LogInformation("Start");
+            Console.WriteLine("Start");
             monitor.Run();
             return Ok();
         }
@@ -64,7 +67,8 @@ namespace DNSmonitor.Controllers
         [HttpPost]
         public ActionResult Stop()
         {
-            _logger.LogInformation("Stop");
+            // _logger.LogInformation("Stop");
+            Console.WriteLine("Stop");
             monitor.Stop();
             return Ok();
         }

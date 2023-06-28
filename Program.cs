@@ -13,11 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 #region Serilog
+/*
 builder.Host.UseSerilog((context, logger) =>
 {
     logger.ReadFrom.Configuration(context.Configuration);
     logger.Enrich.FromLogContext();
 });
+*/
 #endregion
 
 #region Swagger

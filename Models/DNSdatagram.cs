@@ -6,9 +6,9 @@
     public class DNSdatagram
     {
         /// <summary>
-        /// 两字节长度数据包唯一标识
+        /// 事务id 两字节长度
         /// </summary>
-        public ushort identification { get; set; }
+        public ushort Transaction_id { get; set; }
         /// <summary>
         /// 0b1xxxxxxx xxxxxxxx 第一位为0:query或者1:response
         /// </summary>
@@ -16,7 +16,7 @@
         /// <summary>
         /// 0bx1111xxx xxxxxxxx 操作码，0:标准查询，1:反向查询，2:服务器状态请求
         /// </summary>
-        public int opcode { get; set; }
+        public int Opcode { get; set; }
         /// <summary>
         /// 0bxxxxx1xx xxxxxxxx AA表示授权回答，默认为0
         /// </summary>
@@ -36,30 +36,50 @@
         /// <summary>
         /// 0bxxxxxxxx x111xxxx zeros 这三位必须为0
         /// </summary>
-        public int zeros { get; set; }
+        public int Zeros { get; set; }
         /// <summary>
         /// 0bxxxxxxxx xxxx1111 rcode 0:没有差错，3：名字有错，表示查询中指定的域名不存在
         /// </summary>
-        public int rcode { get; set; }
+        public int Rcode { get; set; }
         /// <summary>
         /// 两字节问题数
         /// </summary>
-        public int questionnum { get; set; }
+        public int Questions { get; set; }
         /// <summary>
         /// 两字节资源记录数
         /// </summary>
-        public int resource_record_num { get; set; }
+        public int Answer_RRs { get; set; }
         /// <summary>
         /// 两字节授权资源记录数
         /// </summary>
-        public int authresource_record_num { get; set; }
+        public int Authority_RRs { get; set; }
         /// <summary>
         /// 两字节额外资源记录数
         /// </summary>
-        public int extraresource_record_num { get;set; }
+        public int Additional_RRs { get;set; }
         /// <summary>
         /// 查询问题
         /// </summary>
-        public List<byte[]>? question { get; set; }
+        //public List<List<byte[]>>? queries { get; set; }
+        public List<dns_query>? Queries { get; set; }
+    }
+
+    /// <summary>
+    /// 查询问题
+    /// </summary>
+    public struct dns_query
+    {
+        /// <summary>
+        /// 域名
+        /// </summary>
+        public string query_name { get; set; }
+        /// <summary>
+        /// 查询类型
+        /// </summary>
+        public int query_type { get; set; }
+        /// <summary>
+        /// 查询类
+        /// </summary>
+        public int query_class { get; set; }
     }
 }

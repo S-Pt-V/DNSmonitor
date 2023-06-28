@@ -9,7 +9,7 @@
             API控制器
             </summary>
         </member>
-        <member name="M:DNSmonitor.Controllers.MonitorController.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.MonitorController})">
+        <member name="M:DNSmonitor.Controllers.MonitorController.#ctor">
             <summary>
             构造函数
             </summary>
@@ -53,12 +53,6 @@
         <member name="M:DNSmonitor.Controllers.RawsocketController.GetAllAddr">
             <summary>
             获取本机所有网卡地址
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:DNSmonitor.Controllers.RawsocketController.StartListen">
-            <summary>
-            开始监听
             </summary>
             <returns></returns>
         </member>
@@ -442,7 +436,7 @@
             rawsocket监听线程
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.MonitorController})">
+        <member name="M:DNSmonitor.Models.Monitor.#ctor">
             <summary>
             构造函数
             </summary>
@@ -484,7 +478,8 @@
             <summary>
             UDP数据包解析
             </summary>
-            <param name="packet"></param>
+            <param name="packet">packet对象</param>
+            <param name="origionalpacket">原始的packet</param>
         </member>
         <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram,System.Byte[])">
             <summary>
@@ -493,86 +488,72 @@
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>
-            Rawsocket类定义
+            原始套接字
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket._logger">
+        <member name="P:DNSmonitor.Models.Rawsocket.listening_ip">
             <summary>
-            日志记录
+            监听IP
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.Rawsocket.ErrorOccured">
+        <member name="P:DNSmonitor.Models.Rawsocket.socket">
             <summary>
-            是否有错误发生
+            套接字
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.Listener">
+        <member name="P:DNSmonitor.Models.Rawsocket.recv_count">
             <summary>
-            使用Rawsocket的监听线程
+            接收数据计数
             </summary>
         </member>
-        <member name="F:DNSmonitor.Models.Rawsocket.Syslog">
+        <member name="P:DNSmonitor.Models.Rawsocket.recv_buffer_length">
             <summary>
-            使用Udpsocket 发送 syslog 的线程
+            接收缓冲区长度
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.#ctor(Microsoft.Extensions.Logging.ILogger{DNSmonitor.Controllers.RawsocketController})">
+        <member name="P:DNSmonitor.Models.Rawsocket.recv_buffer">
+            <summary>
+            接收缓冲区
+            </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Rawsocket.#ctor">
             <summary>
             构造函数
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.CreateAndBindSocket(System.String)">
+        <member name="T:DNSmonitor.Models.Syslog">
             <summary>
-            创建并绑定套接字至指定IP地址
-            </summary>
-            <param name="IP">绑定的IP地址</param>
-        </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.SetSocketOption">
-            <summary>
-            设置具有IO控制功能的Socket
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.Run">
-            <summary>
-            运行RawSocket
+            syslog 数据的对象内容
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.CallReceive(System.IAsyncResult)">
+        <member name="P:DNSmonitor.Models.Syslog.src_addr">
             <summary>
-            接收数据回调函数
-            </summary>
-            <param name="ar"></param>
-        </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.Receive(System.Byte[],System.Int32)">
-            <summary>
-            接收数据包
-            形成PacketArrivedEventArgs时间数据类对象，并引发PacketArrival事件
-            </summary>
-            <param name="buf">接收缓冲区</param>
-            <param name="len">接收数据长度</param>
-        </member>
-        <member name="T:DNSmonitor.Models.Rawsocket.PacketArrivedEventHandler">
-            <summary>
-            
-            </summary>
-            <param name="sender"></param>
-            <param name="args"></param>
-        </member>
-        <member name="E:DNSmonitor.Models.Rawsocket.PacketArrival">
-            <summary>
-            PacketArrival事件
+            源地址
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.OnPacketArrival(DNSmonitor.Models.PacketArrivedEventArgs)">
+        <member name="P:DNSmonitor.Models.Syslog.srt_port">
             <summary>
-            PacketArrival事件的处理
+            源端口
             </summary>
-            <param name="e"></param>
         </member>
-        <member name="M:DNSmonitor.Models.Rawsocket.Shutdown">
+        <member name="P:DNSmonitor.Models.Syslog.dst_addr">
             <summary>
-            关闭套接字
+            目的地址
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Syslog.dst_port">
+            <summary>
+            目的端口
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Syslog.query">
+            <summary>
+            请求域名
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Syslog.respond">
+            <summary>
+            响应
             </summary>
         </member>
     </members>

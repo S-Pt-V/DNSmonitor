@@ -29,7 +29,8 @@ namespace DNSmonitor.Controllers
         {
             _logger = logger;
             _configuration = configuration;
-            rs = new Rawsocket(_logger);
+            // rs = new Rawsocket(_logger);
+            rs = new Rawsocket();
         }
 
         /// <summary>
@@ -54,6 +55,7 @@ namespace DNSmonitor.Controllers
         /// 开始监听
         /// </summary>
         /// <returns></returns>
+        /*
         [HttpPost]
         public ActionResult StartListen()
         {
@@ -70,5 +72,6 @@ namespace DNSmonitor.Controllers
             rs.Run();
             return Ok();
         }
+        */
     }
 }
