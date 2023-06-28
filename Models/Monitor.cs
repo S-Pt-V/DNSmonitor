@@ -17,8 +17,10 @@ namespace DNSmonitor.Models
         // private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        const string IP = "10.200.1.66";
+        // const string IP = "10.200.1.66";
+        // const string IP = "59.220.240.1";
         // const string IP = "59.220.240.2";
+        const string IP = "192.168.51.214";
         // 接收缓冲区长度
         private int recv_buffer_length;
         // 接收缓冲区
@@ -324,13 +326,12 @@ namespace DNSmonitor.Models
                 //额外资源记录数
                 dns.Additional_RRs = datagram[10] * 256 + datagram[11];
                 // _logger.LogInformation("问题数：" + dns.questionnum.ToString() + "\t资源记录数：" + dns.resource_record_num.ToString() + "\t授权资源记录数：" + dns.authresource_record_num.ToString() + "\t额外资源记录数：" + dns.extraresource_record_num.ToString());
-                Console.WriteLine("QR: " + dns.QR.ToString() + "\topcode: " + dns.Opcode.ToString() + "\tAA: " + dns.AA.ToString() + "\tTC: " + dns.TC.ToString() + "\tRD: " + dns.RD.ToString() + "\tRA: " + dns.RA.ToString() + "\tzeros: " + dns.zeros.ToString() + "\trcode: " + dns.rcode.ToString());
+                Console.WriteLine("QR: " + dns.QR.ToString() + "\topcode: " + dns.Opcode.ToString() + "\tAA: " + dns.AA.ToString() + "\tTC: " + dns.TC.ToString() + "\tRD: " + dns.RD.ToString() + "\tRA: " + dns.RA.ToString() + "\tzeros: " + dns.Zeros.ToString() + "\trcode: " + dns.Rcode.ToString());
                 Console.WriteLine("问题数：" + dns.Questions.ToString() + "\t资源记录数：" + dns.Answer_RRs.ToString() + "\t授权资源记录数：" + dns.Authority_RRs.ToString() + "\t额外资源记录数：" + dns.Additional_RRs.ToString());
 
-                // 问题部分
-                dns.Queries = new List<dns_query>();
-
                 /*
+                 * 问题部分
+                 * 
                  * 初始第一个（可能有多个query）query位于DNS首部之后，即第13个字节开始
                  * 
                  * 每个query结构为：
@@ -338,14 +339,15 @@ namespace DNSmonitor.Models
                  * [两字节查询类型][两字节查询名称]
                  * 
                  */
-                
+
                 // 第一个query从第13字节开始，在字节数组中的位置为12
+                dns.Queries = new List<Dns_query>();
                 int index = 12;
                 // 遍历每一个query
                 for(int count = 0; count < dns.Questions; count++)
                 {
                     // 一个query有多个标识符，每个标识符为一个字节数组
-                    dns_query query = new dns_query();
+                    Dns_query query = new Dns_query();
                     int length = 0;
                     // length + 1 为下一个标识符的长度的索引值
                     for (; index < datagram.Length; index += length + 1)
@@ -361,61 +363,60 @@ namespace DNSmonitor.Models
                         // 临时字节数组存储当前标识符字节数据
                         byte[] temp = new byte[length];
                         Array.Copy(datagram, index + 1, temp, 0, length);
-                        query.query_name += Encoding.ASCII.GetString(temp);
+                        query.Query_name += Encoding.ASCII.GetString(temp);
+                        if (datagram[index + length + 1] != 0)
+                        {
+                            query.Query_name += ".";
+                        }
                         //query.Add(temp);
                     }
                     // 0x00 后的两个字节为
-                    query.query_type = datagram[index + 1] * 256 + datagram[index + 2];
-                    query.query_class = datagram[index + 3] * 256 + datagram[index + 4];
+                    query.Query_type = datagram[index + 1] * 256 + datagram[index + 2];
+                    query.Query_class = datagram[index + 3] * 256 + datagram[index + 4];
                     dns.Queries.Add(query);
                     index += 5;
                 }
-
-                /*
-                for (query_index = 12; query_index < datagram.Length; query_index += length + 1)
+                Console.WriteLine(dns.Queries.Count.ToString() + " queries.");
+                foreach(Dns_query query in dns.Queries)
                 {
-                    length = datagram[query_index];
-                    // _logger.LogInformation("datagram index: " + index.ToString() + "\t" + "identificator length: " + length.ToString());
-                    if (length == 0)
-                    {
-                        // _logger.LogInformation("Root identificator detected");
-                        break;
-                    }
-                    byte[] temp = new byte[length];
-                    Array.Copy(datagram, query_index + 1, temp, 0, length);
-                    dns.queries.Add(temp);
+                    Console.WriteLine("Name: " + query.Query_name + "\tType: " + query.Query_type.ToString() + "\tClass: " + query.Query_class.ToString());
                 }
-                */
-                // foreach (byte[] identificator in identificators)
-                // {
-                //     _logger.LogInformation(Encoding.ASCII.GetString(identificator));
-                // }
-                //_logger.LogInformation("请求类型：" + ((int)(datagram[index + 1] * 256 + datagram[index + 2])).ToString() + "\t查询类：" + ((int)(datagram[index + 3] * 256 + datagram[index + 4])).ToString());
 
-                // 回答
                 /*
-                if(dns.QR == 1)
+                 * 应答部分
+                 * 
+                 * 应答部分结构如下：
+                 * 
+                 * 两个字节为该应答对应的名字，通常为两个字节。前两位为11表示为压缩表示方法，后续的14位表示该名字相对于包头的偏移位置
+                 * 两个字节的type
+                 * 两个字节的class
+                 * 四个字节的生存周期
+                 * 两个字节的数据长度
+                 * 之后就是数据
+                 * 
+                 */
+                // 遍历每个响应
+                /*
+                for(int count = 0; count < dns.Answer_RRs; count++)
                 {
-                    List<byte[]> answers = new List<byte[]>();
-                    index += 5;
-                    length = 0;
-                    for(; index < datagram.Length; index += length + 1)
+                    Dns_answer answer = new Dns_answer();
+                    if ((datagram[index] & 0b11000000) == 0xC0)
                     {
-                        length = datagram[index];
-                        _logger.LogInformation("Index: " + index.ToString() + "\tlength: " + length.ToString());
-                        if (length == 0)
+                        int name_length = 0;
+                        for(int name_index = (datagram[index] & 0b00111111) * 256 + datagram[index + 1]; name_index < datagram.Length; name_index += name_length + 1)
                         {
-                            _logger.LogInformation("Answer end");
-                            break;
+                            if (datagram)
+                            {
+
+                            }
                         }
-                        byte[] temp = new byte[length];
-                        Array.Copy(datagram, index + 1, temp, 0, length);
-                        answers.Add(temp);
+                    }
+                    else
+                    {
+                        Console.WriteLine("can't find name");
                     }
                 }
                 */
-                // 授权
-                // 额外信息
                 
             }
             catch (Exception e)
@@ -423,6 +424,34 @@ namespace DNSmonitor.Models
                 // _logger.LogError(e.ToString());
                 Console.WriteLine(e.ToString());
             }
+        }
+
+        /// <summary>
+        /// 从DNS数据包中取出请求名字
+        /// </summary>
+        /// <param name="datagram">DNS报文的字节数据</param>
+        /// <param name="index">名称字段位置</param>
+        /// <returns></returns>
+        private string Getname(byte[] datagram, int index)
+        {
+            string name = "";
+            for (int length = datagram[index]; index < datagram.Length; index += length + 1)
+            {
+                length = datagram[index];
+                if(length == 0)
+                {
+                    Console.WriteLine();
+                    return name;
+                }
+                byte[] temp = new byte[length];
+                Array.Copy(datagram, index + 1, temp, 0, length);
+                name += Encoding.ASCII.GetString(temp);
+                if (datagram[index + length + 1] != 0)
+                {
+                    name += ".";
+                }
+            }
+            return name;
         }
     }
 }

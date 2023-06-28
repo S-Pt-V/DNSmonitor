@@ -61,25 +61,60 @@
         /// 查询问题
         /// </summary>
         //public List<List<byte[]>>? queries { get; set; }
-        public List<dns_query>? Queries { get; set; }
+        public List<Dns_query>? Queries { get; set; }
+        /// <summary>
+        /// 资源记录
+        /// </summary>
+        public List<Dns_answer>? AnswerRRs { get; set; }
     }
 
     /// <summary>
     /// 查询问题
     /// </summary>
-    public struct dns_query
+    public struct Dns_query
     {
         /// <summary>
         /// 域名
         /// </summary>
-        public string query_name { get; set; }
+        public string Query_name { get; set; }
         /// <summary>
         /// 查询类型
         /// </summary>
-        public int query_type { get; set; }
+        public int Query_type { get; set; }
         /// <summary>
         /// 查询类
         /// </summary>
-        public int query_class { get; set; }
+        public int Query_class { get; set; }
+    }
+
+    /// <summary>
+    /// DNS响应的资源记录
+    /// </summary>
+    public struct Dns_answer
+    {
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string Answer_name { get; set; }
+        /// <summary>
+        /// 响应类型
+        /// </summary>
+        public ushort Answer_type { get; set; }
+        /// <summary>
+        /// 响应类
+        /// </summary>
+        public ushort Answer_class { get; set; }
+        /// <summary>
+        /// 生存周期
+        /// </summary>
+        public int Answer_ttl { get; set; }
+        /// <summary>
+        /// 数据长度
+        /// </summary>
+        public ushort Answer_datalength { get; set; }
+        /// <summary>
+        /// 数据
+        /// </summary>
+        public string Answer_data { get; set; }
     }
 }
