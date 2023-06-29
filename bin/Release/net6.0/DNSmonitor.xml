@@ -131,24 +131,64 @@
             查询问题
             </summary>
         </member>
-        <member name="T:DNSmonitor.Models.dns_query">
+        <member name="P:DNSmonitor.Models.DNSdatagram.AnswerRRs">
+            <summary>
+            资源记录
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Dns_query">
             <summary>
             查询问题
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.dns_query.Query_name">
+        <member name="P:DNSmonitor.Models.Dns_query.Query_name">
             <summary>
             域名
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.dns_query.Query_type">
+        <member name="P:DNSmonitor.Models.Dns_query.Query_type">
             <summary>
             查询类型
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.dns_query.Query_class">
+        <member name="P:DNSmonitor.Models.Dns_query.Query_class">
             <summary>
             查询类
+            </summary>
+        </member>
+        <member name="T:DNSmonitor.Models.Dns_answer">
+            <summary>
+            DNS响应的资源记录
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_type">
+            <summary>
+            响应类型
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_class">
+            <summary>
+            响应类
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_ttl">
+            <summary>
+            生存周期
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_datalength">
+            <summary>
+            数据长度
+            </summary>
+        </member>
+        <member name="P:DNSmonitor.Models.Dns_answer.Answer_data">
+            <summary>
+            数据
             </summary>
         </member>
         <member name="T:DNSmonitor.Models.PacketArrivedEventArgs">
@@ -505,6 +545,14 @@
             <summary>
             过滤DNS相关数据
             </summary>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.Getname(System.Byte[],System.Int32)">
+            <summary>
+            从DNS数据包中取出请求名字
+            </summary>
+            <param name="datagram">DNS报文的字节数据</param>
+            <param name="index">名称字段位置</param>
+            <returns></returns>
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket">
             <summary>
