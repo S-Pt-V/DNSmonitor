@@ -256,7 +256,7 @@ namespace DNSmonitor.Models
         {
             try
             {
-                Console.WriteLine("*************************************************************************************************");
+                Console.WriteLine("\n*************************************************************************************************");
                 Console.WriteLine(BitConverter.ToString(udpdatagram.datagram));
                 
                 // 复制udp数据报中的数据部分
@@ -287,7 +287,9 @@ namespace DNSmonitor.Models
                 dns.Authority_RRs = datagram[8] * 256 + datagram[9];
                 //额外资源记录数
                 dns.Additional_RRs = datagram[10] * 256 + datagram[11];
-                
+                Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                Console.WriteLine("Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}", dns.Questions.ToString(), dns.Answer_RRs.ToString(), dns.Authority_RRs.ToString(), dns.Additional_RRs.ToString());
+
                 /*
                  * 问题部分
                  * 初始第一个（可能有多个query）query位于DNS首部之后，即第13个字节开始
@@ -366,7 +368,7 @@ namespace DNSmonitor.Models
                         {
                             // 后14位为该字段相对于DNS头部的偏移
                             int offset = (datagram[index] & 0b00111111) * 256 + datagram[index + 1];
-                            answer.Answer_name = Getname(datagram, offset);
+                            answer.Answer_name = GetName(datagram, offset);
                             answer.Answer_type = (ushort)(datagram[index + 2] * 256 + datagram[index + 3]);
                             answer.Answer_class = (ushort)(datagram[index + 4] * 256 + datagram[index + 5]);
                             answer.Answer_ttl = datagram[index + 6] * 16777216 + datagram[index + 7] * 65536 + datagram[index + 8] * 256 + datagram[index + 9];
@@ -374,7 +376,9 @@ namespace DNSmonitor.Models
                             index += 12;
                             byte[] answerdata = new byte[answer.Answer_datalength];
                             Array.Copy(datagram, index, answerdata, 0, answer.Answer_datalength);
-                            answer.Answer_data = GetAnswerData(answer.Answer_type, answer.Answer_class, answerdata);
+                            answer.Answer_data = GetAnswerData(answer.Answer_type, answer.Answer_class, answerdata, datagram);
+                            index += answer.Answer_datalength;
+                            dns.AnswerRRs.Add(answer);
                         }
                         else if (datagram[index] <= 0xFF)
                         {
@@ -385,72 +389,13 @@ namespace DNSmonitor.Models
                             Console.WriteLine("不对劲");
                         }
                     }
-                }
-                
-                /*
-                if (dns.Answer_RRs > 0)
-                {
-                    dns.AnswerRRs = new List<Dns_answer>();
-                    for (int count = 0; count < dns.Answer_RRs; count++)
-                    {
-                        Dns_answer answer = new Dns_answer();
-                        if ((datagram[index] & 0b11000000) == 0xC0)
-                        {
-                            int name_index = (datagram[index] & 0b00111111) * 256 + (datagram[index + 1]);
-                            answer.Answer_name = Getname(datagram, name_index);
-                            // Console.WriteLine(datagram[index].ToString() + "\t" + datagram[index + 1].ToString() + "\t" + (datagram[index] & 0b00111111).ToString() + "\t" + name_index.ToString());
-                            // Console.WriteLine(name_index.ToString() + "\t" + answer.Answer_name);
-                            answer.Answer_type = (ushort)(datagram[index + 2] * 256 + datagram[index + 3]);
-                            answer.Answer_class = (ushort)(datagram[index + 4] * 256 + datagram[index + 5]);
-                            answer.Answer_ttl = datagram[index + 6] * 16777216 + datagram[index + 7] * 65536 + datagram[index + 8] * 256 + datagram[index + 9];
-                            answer.Answer_datalength = (ushort)(datagram[index + 10] * 256 + datagram[index + 11]);
-                            index += 12;
-                            // Console.WriteLine("name: " + answer.Answer_name + "\ttype: " + answer.Answer_type.ToString() + "\tclass: " + answer.Answer_class.ToString() + "\tttl: " + answer.Answer_ttl.ToString() + "\tdata length: " + answer.Answer_datalength.ToString());
-                            
-                            if (answer.Answer_type == 1 && answer.Answer_class == 1)
-                            {
-                                byte[] temp = new byte[answer.Answer_datalength];
-                                Array.Copy(datagram, index, temp, 0, answer.Answer_datalength);
-                                // Console.WriteLine(new IPAddress(temp).ToString());
-                                answer.Answer_data = new IPAddress(temp).ToString();
-                                index += answer.Answer_datalength;
-                                dns.AnswerRRs.Add(answer);
-                            }
-                            else
-                            {
-                                int name_length = 0;
-                                for (; index < datagram.Length; index += name_length + 1)
-                                {
-                                    name_length = datagram[index];
-                                    if (name_length == 0)
-                                    {
-                                        break;
-                                    }
-                                    byte[] temp = new byte[name_length];
-                                    Array.Copy(datagram, index + 1, temp, 0, name_length);
-                                    answer.Answer_data += Encoding.ASCII.GetString(temp);
-                                    if (datagram[index + name_length + 1] != 0)
-                                    {
-                                        answer.Answer_data += ".";
-                                    }
-                                }
-                                index += 1;
-                                dns.AnswerRRs.Add(answer);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("response resole error");
-                        }
-                    }
                     Console.WriteLine("-------------------------------------------------------------------------------------------------");
-                    Console.WriteLine(dns.Answer_RRs.ToString() + " answer RRs:");
-                    foreach (Dns_answer rr in dns.AnswerRRs)
+                    Console.WriteLine(dns.AnswerRRs.Count.ToString() + " responses:");
+                    foreach (Dns_answer answer in dns.AnswerRRs)
                     {
-                        Console.WriteLine("type: " + rr.Answer_type.ToString() + "\tclass: " + rr.Answer_type.ToString() + "\tttl: " + rr.Answer_ttl.ToString() + "\tdatalength:" + rr.Answer_datalength.ToString() + "\tname: " + rr.Answer_name + "\tdata: " + rr.Answer_data);
+                        Console.WriteLine("Type: {0}\tClass: {1}\t TTL:{2}\tLength: {3}\tname:{4}\tdata: {5}", answer.Answer_type.ToString(), answer.Answer_class.ToString(), answer.Answer_ttl.ToString(), answer.Answer_datalength.ToString(), answer.Answer_name, answer.Answer_data);
                     }
                 }
-                */
             }
             catch (Exception e)
             {
@@ -495,12 +440,109 @@ namespace DNSmonitor.Models
         /// <param name="aclass">DNS请求类</param>
         /// <param name="adatabytes">DNS应答中的字节流数据</param>
         /// <returns></returns>
-        private string GetAnswerData(ushort atype, ushort aclass, byte[] adatabytes)
+        private string GetAnswerData(ushort atype, ushort aclass, byte[] adatabytes, byte[] dnsdatagram)
         {
             string result = "";
 
+            switch (atype)
+            {
+                // A
+                case 1:
+                    // Console.WriteLine("A\t" + aclass.ToString() + adatabytes.Length.ToString());
+                    if (adatabytes.Length == 4)
+                    {
+                        result = new IPAddress(adatabytes).ToString();
+                    }
+                    else
+                    {
+                        result = "UNKNOWN " + adatabytes.Length.ToString() + " bytes data: " + Encoding.ASCII.GetString(adatabytes);
+                    }
+                    break;
+                // NS
+                case 2:
+                    Console.WriteLine("NS\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // CNAME
+                case 5:
+                    Console.WriteLine("CNAME\t" + aclass.ToString()+ "\t" + adatabytes.Length.ToString() + " bytes data: " + CNAMEresolve(adatabytes, dnsdatagram));
+                    result = CNAMEresolve(adatabytes, dnsdatagram);
+                    break;
+                // SOA
+                case 6:
+                    Console.WriteLine("SOA\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // WKS
+                case 11:
+                    Console.WriteLine("WKS\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // PTR
+                case 12:
+                    Console.WriteLine("PTR\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // HINFO
+                case 13:
+                    Console.WriteLine("HINFO\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // MX
+                case 15:
+                    Console.WriteLine("MX\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // AAAA
+                case 28:
+                    Console.WriteLine("AAAA\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // AXFR
+                case 252:
+                    Console.WriteLine("AXFR\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                // ANY
+                case 255:
+                    Console.WriteLine("ANY\t" + aclass.ToString() + " bytes data: " + adatabytes.Length.ToString());
+                    break;
+                default:
+                    Console.WriteLine("UNKNOWN");
+                    result = "UNKNOWN";
+                    break;
+            }
+            return result;
+        }
 
+        /// <summary>
+        /// 解析CNAME数据
+        /// </summary>
+        /// <param name="answerdata">DNS应答中的数据内容</param>
+        /// <param name="dnsdatagram">完整的DNS数据包</param>
+        /// <returns></returns>
+        public string CNAMEresolve(byte[] answerdata, byte[] dnsdatagram)
+        {
+            string result = "";
+            for(int i = 0; i < answerdata.Length;)
+            {
+                // 需要在原始的DNS数据包中寻找指向的域名
+                if((answerdata[i] & 0b11000000) == 0xC0)
+                {
+                    int index = (answerdata[i] & 0b00111111) * 256 + answerdata[i + 1];
+                    result += GetName(dnsdatagram, index);
+                    i += 2;
+                }
+                // 结束
+                else if (answerdata[i] == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    byte[] temp = new byte[answerdata[i]];
+                    Array.Copy(answerdata, i + 1, temp, 0, answerdata[i]);
+                    result += Encoding.ASCII.GetString(temp);
+                    if (answerdata[i + answerdata[i] + 1] != 0)
+                    {
+                        result += ".";
+                    }
+                    i += answerdata[i] + 1;
+                }
 
+            }
             return result;
         }
     }

@@ -61,6 +61,66 @@
             DNS数据包结构
             </summary>
         </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.A">
+            <summary>
+            A记录，由域名获得IPV4地址
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.NS">
+            <summary>
+            查询域名服务器
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.CNAME">
+            <summary>
+            查询规范名称
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.SOA">
+            <summary>
+            开始授权
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.WKS">
+            <summary>
+            熟知服务
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.PTR">
+            <summary>
+            IP地址转换为域名
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.HINFO">
+            <summary>
+            主机信息
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.MX">
+            <summary>
+            邮件交换
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.AAAA">
+            <summary>
+            由域名获得IPv6地址
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.AXFR">
+            <summary>
+            传送整个区的请求
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Type.ANY">
+            <summary>
+            对所有记录的请求
+            </summary>
+        </member>
+        <member name="F:DNSmonitor.Models.DNSdatagram.Dns_Type">
+            <summary>
+            DNS请求和响应类型
+            </summary>
+        </member>
         <member name="P:DNSmonitor.Models.DNSdatagram.Transaction_id">
             <summary>
             事务id 两字节长度
@@ -528,12 +588,6 @@
             <param name="packet">IP数据包的字节数组</param>
             <param name="recved">数据包长度</param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.TCPresolve(DNSmonitor.Models.IPPacket)">
-            <summary>
-            TCP数据包解析
-            </summary>
-            <param name="packet"></param>
-        </member>
         <member name="M:DNSmonitor.Models.Monitor.UDPresolve(DNSmonitor.Models.IPPacket,System.Byte[])">
             <summary>
             UDP数据包解析
@@ -541,17 +595,34 @@
             <param name="packet">packet对象</param>
             <param name="origionalpacket">原始的packet</param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram,System.Byte[])">
+        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram)">
             <summary>
             过滤DNS相关数据
             </summary>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.Getname(System.Byte[],System.Int32)">
+        <member name="M:DNSmonitor.Models.Monitor.GetName(System.Byte[],System.Int32)">
             <summary>
             从DNS数据包中取出请求名字
             </summary>
             <param name="datagram">DNS报文的字节数据</param>
             <param name="index">名称字段位置</param>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.GetAnswerData(System.UInt16,System.UInt16,System.Byte[],System.Byte[])">
+            <summary>
+            根据请求类型、请求类从字节数据中解析出结果并转换为字符串
+            </summary>
+            <param name="atype">DNS请求类型</param>
+            <param name="aclass">DNS请求类</param>
+            <param name="adatabytes">DNS应答中的字节流数据</param>
+            <returns></returns>
+        </member>
+        <member name="M:DNSmonitor.Models.Monitor.CNAMEresolve(System.Byte[],System.Byte[])">
+            <summary>
+            解析CNAME数据
+            </summary>
+            <param name="answerdata">DNS应答中的数据内容</param>
+            <param name="dnsdatagram">完整的DNS数据包</param>
             <returns></returns>
         </member>
         <member name="T:DNSmonitor.Models.Rawsocket">

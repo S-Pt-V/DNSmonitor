@@ -5,6 +5,71 @@
     /// </summary>
     public class DNSdatagram
     {
+        public enum Type
+        {
+            /// <summary>
+            /// A记录，由域名获得IPV4地址
+            /// </summary>
+            A = 1,
+            /// <summary>
+            /// 查询域名服务器
+            /// </summary>
+            NS = 2,
+            /// <summary>
+            /// 查询规范名称
+            /// </summary>
+            CNAME = 5,
+            /// <summary>
+            /// 开始授权
+            /// </summary>
+            SOA = 6,
+            /// <summary>
+            /// 熟知服务
+            /// </summary>
+            WKS = 11,
+            /// <summary>
+            /// IP地址转换为域名
+            /// </summary>
+            PTR = 12,
+            /// <summary>
+            /// 主机信息
+            /// </summary>
+            HINFO = 13,
+            /// <summary>
+            /// 邮件交换
+            /// </summary>
+            MX = 15,
+            /// <summary>
+            /// 由域名获得IPv6地址
+            /// </summary>
+            AAAA = 28,
+            /// <summary>
+            /// 传送整个区的请求
+            /// </summary>
+            AXFR = 252,
+            /// <summary>
+            /// 对所有记录的请求
+            /// </summary>
+            ANY = 255
+        }
+        /// <summary>
+        /// DNS请求和响应类型
+        /// </summary>
+        public Dictionary<ushort, string> Dns_Type = new()
+        {
+            { 1, "A" },
+            { 2, "NS" },
+            { 5, "CNAME" },
+            { 6, "SOA" },
+            { 11, "WKS" },
+            { 12, "PTR" },
+            { 13, "HINFO" },
+            { 15, "MX" },
+            { 28, "AAAA" },
+            { 252, "AXFR" },
+            { 255, "ANY" }
+        };
+
         /// <summary>
         /// 事务id 两字节长度
         /// </summary>

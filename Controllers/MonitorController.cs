@@ -82,5 +82,12 @@ namespace DNSmonitor.Controllers
         {
             return Ok();
         }
+
+
+        [HttpGet]
+        public ActionResult DNSTypeTset(ushort i)
+        {
+            return Ok(new DNSdatagram().Dns_Type[i]);
+        }
     }
 }
