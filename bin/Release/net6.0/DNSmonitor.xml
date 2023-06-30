@@ -610,11 +610,12 @@
         </member>
         <member name="M:DNSmonitor.Models.Monitor.GetAnswerData(System.UInt16,System.UInt16,System.Byte[],System.Byte[])">
             <summary>
-            根据请求类型、请求类从字节数据中解析出结果并转换为字符串
+            解析响应中的数据部分
             </summary>
-            <param name="atype">DNS请求类型</param>
-            <param name="aclass">DNS请求类</param>
-            <param name="adatabytes">DNS应答中的字节流数据</param>
+            <param name="atype">查询类型</param>
+            <param name="aclass">查询类</param>
+            <param name="adatabytes">数据部分的字节流</param>
+            <param name="dnsdatagram">完整的dns字节流数据</param>
             <returns></returns>
         </member>
         <member name="M:DNSmonitor.Models.Monitor.CNAMEresolve(System.Byte[],System.Byte[])">

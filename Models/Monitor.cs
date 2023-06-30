@@ -13,8 +13,8 @@ namespace DNSmonitor.Models
         // private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        const string IP = "10.200.1.66";
-        // const string IP = "192.168.51.214";
+        // const string IP = "10.200.1.66";
+        const string IP = "192.168.51.214";
         // const string IP = "59.220.240.1";
         // const string IP = "59.220.240.2";
         // 接收缓冲区长度
@@ -256,7 +256,7 @@ namespace DNSmonitor.Models
         {
             try
             {
-                Console.WriteLine("\n*************************************************************************************************");
+                Console.WriteLine("\n\n*************************************************************************************************");
                 Console.WriteLine(BitConverter.ToString(udpdatagram.datagram));
                 
                 // 复制udp数据报中的数据部分
@@ -413,19 +413,28 @@ namespace DNSmonitor.Models
         private static string GetName(byte[] datagram, int index)
         {
             string name = "";
-            int length;
-            for (;index < datagram.Length; index += length + 1)
+            // int length;
+            for (;index < datagram.Length; index += datagram[index] + 1)
             {
-                length = datagram[index];
-                // 长度为0表示名称的结束
-                if(length == 0)
+                // length = datagram[index];
+                // Console.WriteLine("index:{0} length:{1}", index.ToString(), datagram[index].ToString());
+                if((datagram[index] & 0b11000000) == 0xC0)
                 {
+                    int name_index = (datagram[index] & 0b00111111) * 256 + datagram[index + 1];
+                    Console.WriteLine("index: {0}   location:{1}", index.ToString(), name_index.ToString());
+                    name += GetName(datagram, name_index);
+                    index += 2;
+                }
+                // 长度为0表示名称的结束
+                if(datagram[index] == 0)
+                {
+                    Console.WriteLine("zero index: {0}", index.ToString());
                     return name;
                 }
-                byte[] temp = new byte[length];
-                Array.Copy(datagram, index + 1, temp, 0, length);
+                byte[] temp = new byte[datagram[index]];
+                Array.Copy(datagram, index + 1, temp, 0, datagram[index]);
                 name += Encoding.ASCII.GetString(temp);
-                if (datagram[index + length + 1] != 0)
+                if (datagram[index + datagram[index] + 1] != 0)
                 {
                     name += ".";
                 }
@@ -434,11 +443,12 @@ namespace DNSmonitor.Models
         }
 
         /// <summary>
-        /// 根据请求类型、请求类从字节数据中解析出结果并转换为字符串
+        /// 解析响应中的数据部分
         /// </summary>
-        /// <param name="atype">DNS请求类型</param>
-        /// <param name="aclass">DNS请求类</param>
-        /// <param name="adatabytes">DNS应答中的字节流数据</param>
+        /// <param name="atype">查询类型</param>
+        /// <param name="aclass">查询类</param>
+        /// <param name="adatabytes">数据部分的字节流</param>
+        /// <param name="dnsdatagram">完整的dns字节流数据</param>
         /// <returns></returns>
         private string GetAnswerData(ushort atype, ushort aclass, byte[] adatabytes, byte[] dnsdatagram)
         {
@@ -464,8 +474,8 @@ namespace DNSmonitor.Models
                     break;
                 // CNAME
                 case 5:
-                    Console.WriteLine("CNAME\t" + aclass.ToString()+ "\t" + adatabytes.Length.ToString() + " bytes data: " + CNAMEresolve(adatabytes, dnsdatagram));
                     result = CNAMEresolve(adatabytes, dnsdatagram);
+                    Console.WriteLine("CNAME\t" + aclass.ToString() + "\t" + adatabytes.Length.ToString() + " bytes data: " + result);
                     break;
                 // SOA
                 case 6:
@@ -522,6 +532,7 @@ namespace DNSmonitor.Models
                 if((answerdata[i] & 0b11000000) == 0xC0)
                 {
                     int index = (answerdata[i] & 0b00111111) * 256 + answerdata[i + 1];
+                    Console.WriteLine("压缩显示 index {0}", index.ToString());
                     result += GetName(dnsdatagram, index);
                     i += 2;
                 }
@@ -532,6 +543,7 @@ namespace DNSmonitor.Models
                 }
                 else
                 {
+                    Console.WriteLine("index {0} length {1}", i.ToString(), answerdata[i].ToString());
                     byte[] temp = new byte[answerdata[i]];
                     Array.Copy(answerdata, i + 1, temp, 0, answerdata[i]);
                     result += Encoding.ASCII.GetString(temp);
