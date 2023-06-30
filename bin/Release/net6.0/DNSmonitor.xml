@@ -456,62 +456,62 @@
             IP数据包
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.version">
+        <member name="P:DNSmonitor.Models.IPPacket.Version">
             <summary>
             IP协议版本号
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.headerlength">
+        <member name="P:DNSmonitor.Models.IPPacket.Headerlength">
             <summary>
             数据包头部长度
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.tos">
+        <member name="P:DNSmonitor.Models.IPPacket.Tos">
             <summary>
             服务类型
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.totallength">
+        <member name="P:DNSmonitor.Models.IPPacket.Totallength">
             <summary>
             数据包总长度，头部长度加数据部分长度
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.identification">
+        <member name="P:DNSmonitor.Models.IPPacket.Identification">
             <summary>
             id
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.offset">
+        <member name="P:DNSmonitor.Models.IPPacket.Offset">
             <summary>
             片偏移
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.ttl">
+        <member name="P:DNSmonitor.Models.IPPacket.Ttl">
             <summary>
             存活周期
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.protocol">
+        <member name="P:DNSmonitor.Models.IPPacket.Protocol">
             <summary>
             数据部分协议
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.checksum">
+        <member name="P:DNSmonitor.Models.IPPacket.Checksum">
             <summary>
             校验和
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.src_addr">
+        <member name="P:DNSmonitor.Models.IPPacket.Src_addr">
             <summary>
             源地址
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.dst_addr">
+        <member name="P:DNSmonitor.Models.IPPacket.Dst_addr">
             <summary>
             目的地址
             </summary>
         </member>
-        <member name="P:DNSmonitor.Models.IPPacket.data">
+        <member name="P:DNSmonitor.Models.IPPacket.Data">
             <summary>
             数据部分缓存
             </summary>
@@ -595,7 +595,7 @@
             <param name="packet">packet对象</param>
             <param name="origionalpacket">原始的packet</param>
         </member>
-        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.IPPacket,DNSmonitor.Models.UDPdatagram)">
+        <member name="M:DNSmonitor.Models.Monitor.DNSfilter(DNSmonitor.Models.UDPdatagram,DNSmonitor.Models.IPPacket)">
             <summary>
             过滤DNS相关数据
             </summary>

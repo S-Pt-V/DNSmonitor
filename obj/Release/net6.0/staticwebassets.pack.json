@@ -1,39 +1,39 @@
 {
   "Files": [
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\css\\app.3d5ab858.css",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\css\\app.3d5ab858.css",
       "PackagePath": "staticwebassets\\css\\app.3d5ab858.css"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\favicon.ico",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\index.html",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\index.html",
       "PackagePath": "staticwebassets\\index.html"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js",
       "PackagePath": "staticwebassets\\js\\about.fb5f8f1f.js"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js.map",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js.map",
       "PackagePath": "staticwebassets\\js\\about.fb5f8f1f.js.map"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js",
       "PackagePath": "staticwebassets\\js\\app.a8ce8b68.js"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js.map",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js.map",
       "PackagePath": "staticwebassets\\js\\app.a8ce8b68.js.map"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js",
       "PackagePath": "staticwebassets\\js\\chunk-vendors.b33b7fe2.js"
     },
     {
-      "Id": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js.map",
+      "Id": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js.map",
       "PackagePath": "staticwebassets\\js\\chunk-vendors.b33b7fe2.js.map"
     },
     {

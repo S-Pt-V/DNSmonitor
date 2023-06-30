@@ -13,8 +13,8 @@ namespace DNSmonitor.Models
         // private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        // const string IP = "10.200.1.66";
-        const string IP = "192.168.51.214";
+        const string IP = "10.200.1.66";
+        // const string IP = "192.168.51.214";
         // const string IP = "59.220.240.1";
         // const string IP = "59.220.240.2";
         // 接收缓冲区长度
@@ -157,11 +157,9 @@ namespace DNSmonitor.Models
                 if (rawsocket != null)
                 {
                     int recved = rawsocket.Receive(recv_buffer);
-                    // _logger.LogInformation(recved.ToString() + " bytes received");
                     byte[] packet = new byte[recved];
                     Array.Copy(recv_buffer, 0, packet, 0, recved);
                     ResloveIPPacket(packet, recved);
-                    // _logger.LogInformation(BitConverter.ToString(packet));
                 }
             }
         }
@@ -178,48 +176,48 @@ namespace DNSmonitor.Models
             {
                 IPHeader* header = (IPHeader*)fixed_buf;
                 // IP协议版本
-                ip_packet.version = (uint)(header->ip_verlen & 0xF0) >> 4;
+                ip_packet.Version = (uint)(header->ip_verlen & 0xF0) >> 4;
                 // IP数据包头部长度
-                ip_packet.headerlength = (uint)(header->ip_verlen & 0x0F) << 2;
+                ip_packet.Headerlength = (uint)(header->ip_verlen & 0x0F) << 2;
                 // IP服务类型
-                ip_packet.tos = (byte)header->ip_tos;
+                ip_packet.Tos = (byte)header->ip_tos;
                 // 数据包总长度
-                ip_packet.totallength = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
+                ip_packet.Totallength = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
                 // id
-                ip_packet.identification = (ushort)header->ip_id;
+                ip_packet.Identification = (ushort)header->ip_id;
                 // 偏移
-                ip_packet.offset = (ushort)header->ip_offset;
+                ip_packet.Offset = (ushort)header->ip_offset;
                 // 生存周期
-                ip_packet.ttl = (byte)header->ip_ttl;
+                ip_packet.Ttl = (byte)header->ip_ttl;
                 // 协议类型的字节数据
                 byte protocol_byte = (byte)header->ip_protocol;
                 // 校验和
-                ip_packet.checksum = (ushort)header->ip_checksum;
+                ip_packet.Checksum = (ushort)header->ip_checksum;
                 // 源地址
-                ip_packet.src_addr = new IPAddress(header->ip_srcaddr).ToString();
+                ip_packet.Src_addr = new IPAddress(header->ip_srcaddr).ToString();
                 // 目的地址
-                ip_packet.dst_addr = new IPAddress(header->ip_dstaddr).ToString();
+                ip_packet.Dst_addr = new IPAddress(header->ip_dstaddr).ToString();
                 // 获取数据内容
-                ip_packet.data = new byte[recved - ip_packet.headerlength];
-                Array.Copy(packet, ip_packet.headerlength, ip_packet.data, 0, recved - ip_packet.headerlength);
+                ip_packet.Data = new byte[recved - ip_packet.Headerlength];
+                Array.Copy(packet, ip_packet.Headerlength, ip_packet.Data, 0, recved - ip_packet.Headerlength);
                 // 协议类型
                 switch (protocol_byte)
                 {
                     case 1:
-                        ip_packet.protocol = "ICMP";
+                        ip_packet.Protocol = "ICMP";
                         break;
                     case 2:
-                        ip_packet.protocol = "IGMP";
+                        ip_packet.Protocol = "IGMP";
                         break;
                     case 6:
-                        ip_packet.protocol = "TCP";
+                        ip_packet.Protocol = "TCP";
                         break;
                     case 17:
-                        ip_packet.protocol = "UDP";
+                        ip_packet.Protocol = "UDP";
                         UDPresolve(ip_packet, packet);
                         break;
                     default:
-                        ip_packet.protocol = "UNKONOWN";
+                        ip_packet.Protocol = "UNKONOWN";
                         break;
                 }
             }
@@ -233,26 +231,31 @@ namespace DNSmonitor.Models
         unsafe private void UDPresolve(IPPacket packet, byte[] origionalpacket)
         {
             UDPdatagram udpdatagram = new UDPdatagram();
-            fixed (byte* fixed_buf = packet.data)
+            fixed (byte* fixed_buf = packet.Data)
             {
                 UDPHeader* udpheader = (UDPHeader*)fixed_buf;
                 udpdatagram.srcport = (ushort)(fixed_buf[0] * 256 + fixed_buf[1]);
                 udpdatagram.dstport = (ushort)(fixed_buf[2] * 256 + fixed_buf[3]);
                 udpdatagram.length = (ushort)(fixed_buf[4] * 256 + fixed_buf[5]);
                 udpdatagram.checksum = (ushort)(fixed_buf[6] * 256 + fixed_buf[7]);
-                udpdatagram.datagram = new byte[packet.data.Length - 8];
-                Array.Copy(packet.data, 8, udpdatagram.datagram, 0, packet.data.Length - 8);
+                if(packet.Data == null)
+                {
+                    Console.WriteLine("packet.Data is null, operation break;");
+                    return;
+                }
+                udpdatagram.datagram = new byte[packet.Data.Length - 8];
+                Array.Copy(packet.Data, 8, udpdatagram.datagram, 0, packet.Data.Length - 8);
             }
             if(udpdatagram.srcport == 53 || udpdatagram.dstport == 53)
             {
-                DNSfilter(packet, udpdatagram);
+                DNSfilter(udpdatagram, packet);
             }
         }
 
         /// <summary>
         /// 过滤DNS相关数据
         /// </summary>
-        unsafe private void DNSfilter(IPPacket packet, UDPdatagram udpdatagram)
+        unsafe private void DNSfilter(UDPdatagram udpdatagram, IPPacket packet)
         {
             try
             {
@@ -260,33 +263,33 @@ namespace DNSmonitor.Models
                 Console.WriteLine(BitConverter.ToString(udpdatagram.datagram));
                 
                 // 复制udp数据报中的数据部分
-                byte[] datagram = new byte[udpdatagram.datagram.Length];
-                Array.Copy(udpdatagram.datagram, 0, datagram, 0, udpdatagram.datagram.Length);
+                byte[] dns_datagram = new byte[udpdatagram.datagram.Length];
+                Array.Copy(udpdatagram.datagram, 0, dns_datagram, 0, udpdatagram.datagram.Length);
 
                 // 存放解析后的dns数据报信息
                 DNSdatagram dns = new DNSdatagram();
 
                 // 12字节首部
                 // 前两字节为标识
-                dns.Transaction_id = (ushort)(datagram[0] * 256 + datagram[1]);
+                dns.Transaction_id = (ushort)(dns_datagram[0] * 256 + dns_datagram[1]);
                 // 二、三字节为各个标志位
                 // QR 0：请求 1：响应
-                dns.QR = (datagram[2] & 0b10000000) >> 7;
-                dns.Opcode = (datagram[2] & 0b01111000) >> 3;
-                dns.AA = (datagram[2] & 0b00000100) >> 2;
-                dns.TC = (datagram[2] & 0b00000010) >> 1;
-                dns.RD = (datagram[2] & 0b00000001);
-                dns.RA = (datagram[3] & 0b10000000) >> 7;
-                dns.Zeros = (datagram[3] & 0b01110000) >> 4;
-                dns.Rcode = (datagram[3] & 0b00001111);
+                dns.QR = (dns_datagram[2] & 0b10000000) >> 7;
+                dns.Opcode = (dns_datagram[2] & 0b01111000) >> 3;
+                dns.AA = (dns_datagram[2] & 0b00000100) >> 2;
+                dns.TC = (dns_datagram[2] & 0b00000010) >> 1;
+                dns.RD = (dns_datagram[2] & 0b00000001);
+                dns.RA = (dns_datagram[3] & 0b10000000) >> 7;
+                dns.Zeros = (dns_datagram[3] & 0b01110000) >> 4;
+                dns.Rcode = (dns_datagram[3] & 0b00001111);
                 //问题数
-                dns.Questions = datagram[4] * 256 + datagram[5];
+                dns.Questions = dns_datagram[4] * 256 + dns_datagram[5];
                 //资源记录数
-                dns.Answer_RRs = datagram[6] * 256 + datagram[7];
+                dns.Answer_RRs = dns_datagram[6] * 256 + dns_datagram[7];
                 //授权资源记录数
-                dns.Authority_RRs = datagram[8] * 256 + datagram[9];
+                dns.Authority_RRs = dns_datagram[8] * 256 + dns_datagram[9];
                 //额外资源记录数
-                dns.Additional_RRs = datagram[10] * 256 + datagram[11];
+                dns.Additional_RRs = dns_datagram[10] * 256 + dns_datagram[11];
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine("Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}", dns.Questions.ToString(), dns.Answer_RRs.ToString(), dns.Authority_RRs.ToString(), dns.Additional_RRs.ToString());
 
@@ -309,10 +312,10 @@ namespace DNSmonitor.Models
                     Dns_query query = new Dns_query();
                     int length = 0;
                     // length + 1 为下一个标识符的长度的索引值
-                    for (; index < datagram.Length; index += length + 1)
+                    for (; index < dns_datagram.Length; index += length + 1)
                     {
                         // 长度值
-                        length = datagram[index];
+                        length = dns_datagram[index];
                         // 长度值为0，读取到根标识符，当前查询问题结束
                         if (length == 0)
                         {
@@ -321,16 +324,16 @@ namespace DNSmonitor.Models
                         }
                         // 临时字节数组存储当前标识符字节数据
                         byte[] temp = new byte[length];
-                        Array.Copy(datagram, index + 1, temp, 0, length);
+                        Array.Copy(dns_datagram, index + 1, temp, 0, length);
                         query.Query_name += Encoding.ASCII.GetString(temp);
-                        if (datagram[index + length + 1] != 0)
+                        if (dns_datagram[index + length + 1] != 0)
                         {
                             query.Query_name += ".";
                         }
                     }
                     // 0x00 后的四个个字节为查询类型和查询类
-                    query.Query_type = datagram[index + 1] * 256 + datagram[index + 2];
-                    query.Query_class = datagram[index + 3] * 256 + datagram[index + 4];
+                    query.Query_type = dns_datagram[index + 1] * 256 + dns_datagram[index + 2];
+                    query.Query_class = dns_datagram[index + 3] * 256 + dns_datagram[index + 4];
                     dns.Queries.Add(query);
                     // index直接指向下一个部分的开始
                     index += 5;
@@ -362,25 +365,28 @@ namespace DNSmonitor.Models
                     dns.AnswerRRs = new List<Dns_answer>();
                     for(int count = 0; count < dns.Answer_RRs; count++)
                     {
+                        // Console.WriteLine("getting number {0} answer", count.ToString());
                         Dns_answer answer = new Dns_answer();
                         // 前两位为11，为压缩表示方法，使用后续的14位表示该字段相对于数据报的偏移
-                        if ((datagram[index] & 0b11000000) == 0xC0)
+                        if ((dns_datagram[index] & 0b11000000) == 0xC0)
                         {
                             // 后14位为该字段相对于DNS头部的偏移
-                            int offset = (datagram[index] & 0b00111111) * 256 + datagram[index + 1];
-                            answer.Answer_name = GetName(datagram, offset);
-                            answer.Answer_type = (ushort)(datagram[index + 2] * 256 + datagram[index + 3]);
-                            answer.Answer_class = (ushort)(datagram[index + 4] * 256 + datagram[index + 5]);
-                            answer.Answer_ttl = datagram[index + 6] * 16777216 + datagram[index + 7] * 65536 + datagram[index + 8] * 256 + datagram[index + 9];
-                            answer.Answer_datalength = (ushort)(datagram[index + 10] * 256 + datagram[index + 11]);
+                            int offset = (dns_datagram[index] & 0b00111111) * 256 + dns_datagram[index + 1];
+                            answer.Answer_name = GetName(dns_datagram, offset);
+                            answer.Answer_type = (ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3]);
+                            answer.Answer_class = (ushort)(dns_datagram[index + 4] * 256 + dns_datagram[index + 5]);
+                            answer.Answer_ttl = dns_datagram[index + 6] * 16777216 + dns_datagram[index + 7] * 65536 + dns_datagram[index + 8] * 256 + dns_datagram[index + 9];
+                            answer.Answer_datalength = (ushort)(dns_datagram[index + 10] * 256 + dns_datagram[index + 11]);
                             index += 12;
                             byte[] answerdata = new byte[answer.Answer_datalength];
-                            Array.Copy(datagram, index, answerdata, 0, answer.Answer_datalength);
-                            answer.Answer_data = GetAnswerData(answer.Answer_type, answer.Answer_class, answerdata, datagram);
+                            Array.Copy(dns_datagram, index, answerdata, 0, answer.Answer_datalength);
+
+                            answer.Answer_data = GetAnswerData(answer.Answer_type, answer.Answer_class, answerdata, dns_datagram);
+                            
                             index += answer.Answer_datalength;
                             dns.AnswerRRs.Add(answer);
                         }
-                        else if (datagram[index] <= 0xFF)
+                        else if (dns_datagram[index] <= 0xFF)
                         {
                             Console.WriteLine("好像不该这样datagram[" + index.ToString() + "] <= 0xFF");
                         }
@@ -412,31 +418,49 @@ namespace DNSmonitor.Models
         /// <returns></returns>
         private static string GetName(byte[] datagram, int index)
         {
+            // Console.WriteLine("GetName at {0}, datagram length is {1}", index.ToString(), datagram.Length.ToString());
             string name = "";
             // int length;
-            for (;index < datagram.Length; index += datagram[index] + 1)
+            //  index < datagram.Length是不是不太合适，得要找个方法得到这个字段的长度
+            for (;index < datagram.Length;)
             {
+                // Console.WriteLine("current index: {0}  length under this index:{1}", index.ToString(), datagram[index].ToString());
                 // length = datagram[index];
                 // Console.WriteLine("index:{0} length:{1}", index.ToString(), datagram[index].ToString());
-                if((datagram[index] & 0b11000000) == 0xC0)
+                if ((datagram[index] & 0b11000000) == 0xC0)
                 {
                     int name_index = (datagram[index] & 0b00111111) * 256 + datagram[index + 1];
-                    Console.WriteLine("index: {0}   location:{1}", index.ToString(), name_index.ToString());
-                    name += GetName(datagram, name_index);
+                    // Console.WriteLine("Compressed format, location is {0}", name_index.ToString());
+                    string tempstr = GetName(datagram, name_index);
+                    // Console.WriteLine(tempstr);
+                    name += tempstr;
+                    //Console.WriteLine("index: {0}   location:{1}  {2}", index.ToString(), name_index.ToString(), tempstr);
                     index += 2;
-                }
-                // 长度为0表示名称的结束
-                if(datagram[index] == 0)
-                {
-                    Console.WriteLine("zero index: {0}", index.ToString());
+                    //Console.WriteLine("supposed to end");
+                    /*
+                     * 就是这个位置，如果不直接return会出问题
+                     */
                     return name;
                 }
-                byte[] temp = new byte[datagram[index]];
-                Array.Copy(datagram, index + 1, temp, 0, datagram[index]);
-                name += Encoding.ASCII.GetString(temp);
-                if (datagram[index + datagram[index] + 1] != 0)
+                // 长度为0表示名称的结束
+                if (datagram[index] == 0)
                 {
-                    name += ".";
+                    // Console.WriteLine("Zero detected, end. Result: " + name);
+                    return name;
+                }
+                else
+                {
+                    byte[] temp = new byte[datagram[index]];
+                    // Console.WriteLine("Before copy. index: {0} length: {1}", index.ToString(), datagram[index].ToString());
+                    Array.Copy(datagram, index + 1, temp, 0, datagram[index]);
+                    string str = Encoding.ASCII.GetString(temp);
+                    // Console.WriteLine(str);
+                    name += str;
+                    if (datagram[index + datagram[index] + 1] != 0)
+                    {
+                        name += ".";
+                    }
+                    index += datagram[index] + 1;
                 }
             }
             return "???";
@@ -452,12 +476,14 @@ namespace DNSmonitor.Models
         /// <returns></returns>
         private string GetAnswerData(ushort atype, ushort aclass, byte[] adatabytes, byte[] dnsdatagram)
         {
+            // Console.WriteLine("GetAnswerData");
             string result = "";
 
             switch (atype)
             {
                 // A
                 case 1:
+                    // Console.WriteLine("A");
                     // Console.WriteLine("A\t" + aclass.ToString() + adatabytes.Length.ToString());
                     if (adatabytes.Length == 4)
                     {
@@ -474,8 +500,9 @@ namespace DNSmonitor.Models
                     break;
                 // CNAME
                 case 5:
+                    // Console.WriteLine("CNAME");
                     result = CNAMEresolve(adatabytes, dnsdatagram);
-                    Console.WriteLine("CNAME\t" + aclass.ToString() + "\t" + adatabytes.Length.ToString() + " bytes data: " + result);
+                    // Console.WriteLine("CNAME\t" + aclass.ToString() + "\t" + adatabytes.Length.ToString() + " bytes data: " + result);
                     break;
                 // SOA
                 case 6:
@@ -525,28 +552,34 @@ namespace DNSmonitor.Models
         /// <returns></returns>
         public string CNAMEresolve(byte[] answerdata, byte[] dnsdatagram)
         {
+            // Console.WriteLine("Resolve CNAME, TotalLength: {0}", answerdata.Length.ToString());
             string result = "";
             for(int i = 0; i < answerdata.Length;)
             {
+                // Console.WriteLine("Current index: {0}, Current length: {1}", i.ToString(), answerdata[i].ToString());
                 // 需要在原始的DNS数据包中寻找指向的域名
                 if((answerdata[i] & 0b11000000) == 0xC0)
                 {
                     int index = (answerdata[i] & 0b00111111) * 256 + answerdata[i + 1];
-                    Console.WriteLine("压缩显示 index {0}", index.ToString());
-                    result += GetName(dnsdatagram, index);
+                    // Console.WriteLine("Compressed location : {0}", index.ToString());
+                    string tempstr = GetName(dnsdatagram, index);
+                    // Console.WriteLine(tempstr);
+                    result += tempstr;
                     i += 2;
                 }
                 // 结束
                 else if (answerdata[i] == 0)
                 {
+                    // Console.WriteLine("End, result: " + result);
                     break;
                 }
                 else
                 {
-                    Console.WriteLine("index {0} length {1}", i.ToString(), answerdata[i].ToString());
                     byte[] temp = new byte[answerdata[i]];
                     Array.Copy(answerdata, i + 1, temp, 0, answerdata[i]);
-                    result += Encoding.ASCII.GetString(temp);
+                    string str = Encoding.ASCII.GetString(temp);
+                    result += str;
+                    // Console.WriteLine(str);
                     if (answerdata[i + answerdata[i] + 1] != 0)
                     {
                         result += ".";
@@ -555,6 +588,7 @@ namespace DNSmonitor.Models
                 }
 
             }
+            // Console.WriteLine(result);
             return result;
         }
     }
