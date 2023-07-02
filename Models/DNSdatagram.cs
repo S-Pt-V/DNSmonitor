@@ -131,6 +131,10 @@
         /// 资源记录
         /// </summary>
         public List<Dns_answer>? AnswerRRs { get; set; }
+        /// <summary>
+        /// 权威应答列表
+        /// </summary>
+        public List<Dns_authorityRR>? AuthorityRRs { get; set; }
     }
 
     /// <summary>
@@ -181,5 +185,60 @@
         /// 数据
         /// </summary>
         public string Answer_data { get; set; }
+    }
+
+    /// <summary>
+    /// 权威应答
+    /// </summary>
+    public struct Dns_authorityRR
+    {
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// 响应类型
+        /// </summary>
+        public ushort Type { get; set; }
+        /// <summary>
+        /// 响应类
+        /// </summary>
+        public ushort Class { get; set; }
+        /// <summary>
+        /// 生存周期
+        /// </summary>
+        public int TTL { get; set; }
+        /// <summary>
+        /// 数据长度
+        /// </summary>
+        public ushort Datalength { get; set; }
+        /// <summary>
+        /// 域名服务器
+        /// </summary>
+        public string Primary_Name_Server { get; set; }
+        /// <summary>
+        /// 域名服务器邮箱
+        /// </summary>
+        public string Responsible_Authority_Mailbox { get; set; }
+        /// <summary>
+        /// 序列号
+        /// </summary>
+        public string Serial_Number { get; set; }
+        /// <summary>
+        /// 刷新周期
+        /// </summary>
+        public int Refresh_Interval { get; set; }
+        /// <summary>
+        /// 重试周期
+        /// </summary>
+        public int Retry_Interval { get; set; }
+        /// <summary>
+        /// 报废周期
+        /// </summary>
+        public int Expire_Interval { get; set; }
+        /// <summary>
+        /// 最小周期
+        /// </summary>
+        public int Minimum_Interval { get; set; }
     }
 }

@@ -13,8 +13,8 @@ namespace DNSmonitor.Models
         // private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        const string IP = "10.200.1.66";
-        // const string IP = "192.168.51.214";
+        // const string IP = "10.200.1.66";
+        const string IP = "192.168.51.214";
         // const string IP = "59.220.240.1";
         // const string IP = "59.220.240.2";
         // 接收缓冲区长度
@@ -253,8 +253,10 @@ namespace DNSmonitor.Models
         }
 
         /// <summary>
-        /// 过滤DNS相关数据
+        /// 过滤并解析DNS数据报
         /// </summary>
+        /// <param name="udpdatagram"></param>
+        /// <param name="packet"></param>
         unsafe private void DNSfilter(UDPdatagram udpdatagram, IPPacket packet)
         {
             try
@@ -350,6 +352,12 @@ namespace DNSmonitor.Models
                  * 
                  * 应答部分结构如下：
                  * 
+                 * 两字节名称
+                 * 两字节 type
+                 * 两字节 class
+                 * 两字节 ttl
+                 * 两字节 数据长度
+                 * 
                  * 两个字节为该应答对应的名字，通常为两个字节。前两位为11表示为压缩表示方法，后续的14位表示该名字相对于包头的偏移位置
                  * 两个字节的type
                  * 两个字节的class
@@ -386,10 +394,6 @@ namespace DNSmonitor.Models
                             index += answer.Answer_datalength;
                             dns.AnswerRRs.Add(answer);
                         }
-                        else if (dns_datagram[index] <= 0xFF)
-                        {
-                            Console.WriteLine("好像不该这样datagram[" + index.ToString() + "] <= 0xFF");
-                        }
                         else
                         {
                             Console.WriteLine("不对劲");
@@ -402,6 +406,166 @@ namespace DNSmonitor.Models
                         Console.WriteLine("Type: {0}\tClass: {1}\t TTL:{2}\tLength: {3}\tname:{4}\tdata: {5}", answer.Answer_type.ToString(), answer.Answer_class.ToString(), answer.Answer_ttl.ToString(), answer.Answer_datalength.ToString(), answer.Answer_name, answer.Answer_data);
                     }
                 }
+
+                /*
+                 * 
+                 * 权威应答部分
+                 * 
+                 * 两字节 name
+                 * 两字节 type
+                 * 两字节 class
+                 * 四字节 ttl
+                 * 两字节 data length
+                 * 
+                 * Primary name Server                  跟名称一样
+                 * Responsible authority's mail box     跟名称一样
+                 * Serial Number                        四字节
+                 * Refersh Interval                     四字节
+                 * Retry Interval                       四字节
+                 * Expire limit                         四字节
+                 * Minimum ttl                          四字节
+                 * 
+                 */
+                if (dns.Authority_RRs > 0)
+                {
+                    dns.AuthorityRRs = new List<Dns_authorityRR>();
+                    for(int count = 0; count < dns.Authority_RRs;  count++)
+                    {
+                        Dns_authorityRR authorityRR = new Dns_authorityRR();
+                        // 解析数据包头部，名称应该是一个压缩格式指向的位置
+                        if ((dns_datagram[index] & 0b11000000) == 0xC0)
+                        {
+                            int offset = (dns_datagram[index] & 0b00111111) * 256 + dns_datagram[index + 1];
+                            authorityRR.Name = GetName(dns_datagram, offset);
+                            authorityRR.Type = (ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3]);
+                            authorityRR.Class = (ushort)(dns_datagram[index + 4] * 256 + dns_datagram[index + 5]);
+                            authorityRR.TTL = dns_datagram[index + 6] * 16777216 + dns_datagram[index + 7] * 65536 + dns_datagram[index + 8] * 256 + dns_datagram[index + 9];
+                            authorityRR.Datalength = (ushort)(dns_datagram[index + 10] * 256 + dns_datagram[index + 11]);
+                            index += 12;
+                            byte[] databytes = new byte[authorityRR.Datalength];
+                            Array.Copy(dns_datagram, index, databytes, 0, authorityRR.Datalength);
+                            // Console.WriteLine("权威应答： {0} {1} {2} {3} {4}", authorityRR.Name, authorityRR.Type, authorityRR.Class, authorityRR.TTL, authorityRR.Datalength);
+                            // Console.WriteLine(BitConverter.ToString(databytes));
+                            
+                            // authorityRR.Primary_Name_Server
+                            authorityRR.Primary_Name_Server = "";
+                            int i = 0;
+                            for(; i < databytes.Length;)
+                            {
+                                if ((databytes[i] & 0xC0) == 0xC0)
+                                {
+                                    int location = (databytes[i] & 0b00111111) * 256 + databytes[i + 1];
+                                    // 获取在该位置的名称
+                                    authorityRR.Primary_Name_Server += GetName(dns_datagram, location);
+                                    i += 2;
+                                    break;
+                                }
+                                else
+                                {
+                                    int length = databytes[i];
+                                    byte[] temp = new byte[length];
+                                    Array.Copy(databytes, i+1, temp, 0, length);
+                                    authorityRR.Primary_Name_Server += Encoding.ASCII.GetString(temp);
+                                    i += length + 1;
+                                    if (databytes[i] != 0)
+                                    {
+                                        authorityRR.Primary_Name_Server += ".";
+                                    }
+                                    else
+                                    {
+                                        i += 1;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Console.WriteLine("Primary_Name_Server: " + authorityRR.Primary_Name_Server);
+
+                            // authorityRR.Responsible_Authority_Mailbox
+                            authorityRR.Responsible_Authority_Mailbox = "";
+                            for (; i < databytes.Length;)
+                            {
+                                if ((databytes[i] & 0xC0) == 0xC0)
+                                {
+                                    int location = (databytes[i] & 0b00111111) * 256 + databytes[i + 1];
+                                    // 获取在该位置的名称
+                                    authorityRR.Responsible_Authority_Mailbox += GetName(dns_datagram, location);
+                                    i += 2;
+                                    break;
+                                }
+                                else
+                                {
+                                    int length = databytes[i];
+                                    byte[] temp = new byte[length];
+                                    Array.Copy(databytes, i + 1, temp, 0, length);
+                                    authorityRR.Responsible_Authority_Mailbox += Encoding.ASCII.GetString(temp);
+                                    i += length + 1;
+                                    if (databytes[i] != 0)
+                                    {
+                                        authorityRR.Responsible_Authority_Mailbox += ".";
+                                    }
+                                    else
+                                    {
+                                        i += 1;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Console.WriteLine("Responsible_Authority_Mailbox: " + authorityRR.Responsible_Authority_Mailbox);
+
+                            // authorityRR.Serial_Number
+                            byte[] tempstr = new byte[4];
+                            Array.Copy(databytes, i, tempstr, 0, 4);
+                            authorityRR.Serial_Number = BitConverter.ToString(tempstr);
+                            i += 4;
+                            // authorityRR.Refersh_Interval
+                            authorityRR.Refresh_Interval = databytes[i] * 16777216 + databytes[i + 1] * 65536 + databytes[i + 2] * 256 + databytes[i + 3];
+                            i += 4;
+                            // authorityRR.Retry_Interval
+                            authorityRR.Expire_Interval = databytes[i] * 16777216 + databytes[i + 1] * 65536 + databytes[i + 2] * 256 + databytes[i + 3];
+                            i += 4;
+                            // authorityRR.Expire_Interval
+                            authorityRR.Retry_Interval = databytes[i] * 16777216 + databytes[i + 1] * 65536 + databytes[i + 2] * 256 + databytes[i + 3];
+                            i += 4;
+                            // authorityRR.Minimum_Interval
+                            authorityRR.Minimum_Interval = databytes[i] * 16777216 + databytes[i + 1] * 65536 + databytes[i + 2] * 256 + databytes[i + 3];
+                            i += 4;
+                        }
+                        else
+                        {
+                            Console.WriteLine("不对劲          -AuthorityRR");
+                        }
+                        dns.AuthorityRRs.Add(authorityRR);
+                    }
+                    Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                    Console.WriteLine(dns.AuthorityRRs.Count.ToString() + " auth RRs:");
+                    foreach (Dns_authorityRR authorityRR in dns.AuthorityRRs)
+                    {
+                        Console.WriteLine("Name: {0} Type: {1} Class: {2} Primary_Name_Server: {3} Responsible_Authority_Mailbox: {4} Serial_Number: {5} Refresh_Interval:{6} Retry_Interval: {7} Expire_Interval: {8} Minimum_Interval: {9}",
+                            authorityRR.Name,
+                            authorityRR.Type.ToString(),
+                            authorityRR.Class.ToString(),
+                            authorityRR.Primary_Name_Server,
+                            authorityRR.Responsible_Authority_Mailbox,
+                            authorityRR.Serial_Number,
+                            authorityRR.Refresh_Interval.ToString(),
+                            authorityRR.Retry_Interval.ToString(),
+                            authorityRR.Expire_Interval.ToString(),
+                            authorityRR.Minimum_Interval.ToString()
+                            );
+                    }
+                }
+
+                /*
+                 * 
+                 * 额外记录部分
+                 * 
+                 */
+
+                if(dns.Additional_RRs  > 0)
+                {
+                    Console.WriteLine("额外记录");
+                }
+
             }
             catch (Exception e)
             {
@@ -586,7 +750,6 @@ namespace DNSmonitor.Models
                     }
                     i += answerdata[i] + 1;
                 }
-
             }
             // Console.WriteLine(result);
             return result;

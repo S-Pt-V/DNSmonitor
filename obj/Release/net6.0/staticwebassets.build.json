@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "M2XOFfbf8GGa5ld1AMlS9DbtgKuid+rpA8dnyQfyfmk=",
+  "Hash": "ps8gLYOGppjaIEU0tUyxosx4l2aL2SSXN7xZTVkf8MA=",
   "Source": "DNSmonitor",
   "BasePath": "_content/DNSmonitor",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "DNSmonitor\\wwwroot",
       "Source": "DNSmonitor",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\css\\app.3d5ab858.css",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\css\\app.3d5ab858.css",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "css/app.3d5ab858.css",
       "AssetKind": "All",
@@ -34,10 +34,10 @@
       "OriginalItemSpec": "wwwroot\\css\\app.3d5ab858.css"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\favicon.ico",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\favicon.ico",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "favicon.ico",
       "AssetKind": "All",
@@ -51,10 +51,10 @@
       "OriginalItemSpec": "wwwroot\\favicon.ico"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\index.html",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\index.html",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "index.html",
       "AssetKind": "All",
@@ -68,10 +68,10 @@
       "OriginalItemSpec": "wwwroot\\index.html"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/about.fb5f8f1f.js",
       "AssetKind": "All",
@@ -85,10 +85,10 @@
       "OriginalItemSpec": "wwwroot\\js\\about.fb5f8f1f.js"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js.map",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\about.fb5f8f1f.js.map",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/about.fb5f8f1f.js.map",
       "AssetKind": "All",
@@ -102,10 +102,10 @@
       "OriginalItemSpec": "wwwroot\\js\\about.fb5f8f1f.js.map"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/app.a8ce8b68.js",
       "AssetKind": "All",
@@ -119,10 +119,10 @@
       "OriginalItemSpec": "wwwroot\\js\\app.a8ce8b68.js"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js.map",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\app.a8ce8b68.js.map",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/app.a8ce8b68.js.map",
       "AssetKind": "All",
@@ -136,10 +136,10 @@
       "OriginalItemSpec": "wwwroot\\js\\app.a8ce8b68.js.map"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/chunk-vendors.b33b7fe2.js",
       "AssetKind": "All",
@@ -153,10 +153,10 @@
       "OriginalItemSpec": "wwwroot\\js\\chunk-vendors.b33b7fe2.js"
     },
     {
-      "Identity": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js.map",
+      "Identity": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\js\\chunk-vendors.b33b7fe2.js.map",
       "SourceId": "DNSmonitor",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\wwwroot\\",
+      "ContentRoot": "D:\\Projects\\6-DNSmonitor\\DNSmonitor\\wwwroot\\",
       "BasePath": "_content/DNSmonitor",
       "RelativePath": "js/chunk-vendors.b33b7fe2.js.map",
       "AssetKind": "All",
