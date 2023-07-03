@@ -13,7 +13,7 @@ namespace DNSmonitor.Models
         // private readonly ILogger<MonitorController> _logger;
 
         // 监听用的IP
-        const string IP = "10.200.1.66";
+        const string IP = "10.200.1.97";
         // const string IP = "192.168.51.214";
         // const string IP = "59.220.240.1";
         // const string IP = "59.220.240.2";
