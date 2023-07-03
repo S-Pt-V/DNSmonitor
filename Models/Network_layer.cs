@@ -1,4 +1,6 @@
-﻿namespace DNSmonitor
+﻿using System.Runtime.InteropServices;
+
+namespace DNSmonitor
 {
     /// <summary>
     /// 网络层的IP数据包解析后的数据格式对象
@@ -23,11 +25,10 @@
             { 6, "TCP"},
             { 17, "UDP"}
         };
-
         /// <summary>
         /// 协议版本
         /// </summary>
-        public uint Version { get; set; }
+        public string? Version { get; set; }
         /// <summary>
         /// 头部长度
         /// </summary>
@@ -39,11 +40,11 @@
         /// <summary>
         /// 数据包总长度
         /// </summary>
-        public ushort Total_length { get; set; }
+        public int Total_length { get; set; }
         /// <summary>
         /// id
         /// </summary>
-        public ushort Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// 片偏移
         /// </summary>
@@ -57,6 +58,10 @@
         /// </summary>
         public string? Protocol { get; set; }
         /// <summary>
+        /// 校验和
+        /// </summary>
+        public ushort Checksum { get; set; }
+        /// <summary>
         /// 源地址
         /// </summary>
         public string? Src_addr { get; set; }
@@ -65,8 +70,66 @@
         /// </summary>
         public string? Dst_addr { get; set; }
         /// <summary>
+        /// 包头的选项
+        /// </summary>
+        public byte[]? Header_option { get; set; }
+        /// <summary>
         /// 数据载荷
         /// </summary>
         public byte[]? Payload { get; set; }
+    }
+
+    /// <summary>
+    /// 数据报头部定义
+    /// </summary>
+    public class Headers
+    {
+        /// <summary>
+        /// IP协议头部
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit)]
+        public struct IPHeader
+        {
+            /// <summary>
+            /// 协议版本及首部长度。前4位为版本号，0100 IPv4，0110 IPv6。后4bit为首部长度，该值乘以4
+            /// </summary>
+            [FieldOffset(0)] public byte verlen;
+            /// <summary>
+            /// 服务类型
+            /// </summary>
+            [FieldOffset(1)] public byte tos;
+            /// <summary>
+            /// 总长度
+            /// </summary>
+            [FieldOffset(2)] public ushort total_length;
+            /// <summary>
+            /// ID
+            /// </summary>
+            [FieldOffset(4)] public ushort id;
+            /// <summary>
+            /// 分段偏移
+            /// </summary>
+            [FieldOffset(6)] public ushort offset;
+            /// <summary>
+            /// 生存周期
+            /// </summary>
+            [FieldOffset(8)] public byte ttl;
+            /// <summary>
+            /// 协议类型
+            /// </summary>
+            [FieldOffset(9)] public byte protocol;
+            /// <summary>
+            /// 校验和
+            /// </summary>
+            [FieldOffset(10)] public ushort checksum;
+            /// <summary>
+            /// 源地址
+            /// </summary>
+            [FieldOffset(12)] public uint srcaddr;
+            /// <summary>
+            /// 目的地址
+            /// </summary>
+            [FieldOffset(16)] public uint dstaddr;
+        }
     }
 }
