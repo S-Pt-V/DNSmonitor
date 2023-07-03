@@ -82,7 +82,7 @@
         /// </summary>
         public static Dictionary<int, string> Type_dict = new Dictionary<int, string>()
         {
-            {1, "A"},           // A记录
+            {1, "A"},           // A记录，主机地址
             {2, "NS"},          // Name Server记录
             {3, "MD" },         // a mail destination (Obsolete - use MX)
             {5, "CNAME"},       // CNAME 记录
@@ -193,6 +193,6 @@
         /// <summary>
         /// 数据
         /// </summary>
-        public byte[]? Data { get; set; } 
+        public string? Data { get; set; } 
     }
 }
