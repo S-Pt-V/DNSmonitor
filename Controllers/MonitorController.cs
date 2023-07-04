@@ -10,6 +10,7 @@ namespace DNSmonitor.Controllers
     [ApiController]
     public class MonitorController : ControllerBase
     {
+        /*
         /// <summary>
         /// 开始监听
         /// </summary>
@@ -20,5 +21,6 @@ namespace DNSmonitor.Controllers
             MonitorService.StratListen();
             return Ok();
         }
+        */
     }
 }

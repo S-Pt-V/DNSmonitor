@@ -24,9 +24,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.GetRequiredService<MonitorService>())
-{
-
-}
+MonitorService.StratListen();
 
 app.Run();
