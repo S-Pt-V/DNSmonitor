@@ -26,4 +26,4 @@ app.MapControllers();
 
 MonitorService.StratListen();
 
-app.Run();
+// app.Run();
