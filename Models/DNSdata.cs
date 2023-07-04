@@ -65,11 +65,15 @@
         /// <summary>
         /// 资源记录
         /// </summary>
-        public List<DNS_answerRR>? AnswerRRs { get; set; }
+        public List<DNS_RR>? AnswerRRs { get; set; }
         /// <summary>
         /// 权威应答列表
         /// </summary>
-        // public List<Dns_authorityRR>? AuthorityRRs { get; set; }
+        public List<DNS_RR>? AuthorityRRs { get; set; }
+        /// <summary>
+        /// 额外记录
+        /// </summary>
+        public List<DNS_RR>? AdditionalRRs { get; set; }
     }
 
     /// <summary>
@@ -97,6 +101,7 @@
             {15, "MX"},         // 邮件交换
             {16, "TXT" },       // text strings
             {28, "AAAA"},       // AAAA记录
+            {65, "HTTPS" },     // HTTPS
             {252, "AXFR"},      // A request for a transfer of an entire zone
             {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
             {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
@@ -129,6 +134,76 @@
     }
 
     /// <summary>
+    /// DNS资源记录类型
+    /// </summary>
+    public class DNS_RR
+    {
+        /// <summary>
+        /// 请求类型
+        /// </summary>
+        public static Dictionary<int, string> Type_dict = new Dictionary<int, string>()
+        {
+            {1, "A"},           // A记录
+            {2, "NS"},          // Name Server记录
+            {3, "MD" },         // a mail destination (Obsolete - use MX)
+            {5, "CNAME"},       // CNAME 记录
+            {6, "SOA" },        // 起始授权
+            {7, "MB" },         // a mailbox domain name (EXPERIMENTAL)
+            {8, "MG" },         // a mail group member (EXPERIMENTAL)
+            {9, "MR" },         // a mail rename domain name
+            {10, "NULL" },      // a NULL RR (EXPERIMENTAL)
+            {11, "WKS" },       // a well known service description      
+            {12, "PTR"},        // 指针
+            {13, "HINFO"},      // 主机信息
+            {15, "MX"},         // 邮件交换
+            {16, "TXT" },       // text strings
+            {28, "AAAA"},       // AAAA记录
+            {65, "HTTPS" },     // HTTPS
+            {252, "AXFR"},      // A request for a transfer of an entire zone
+            {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
+            {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
+            {255, "ANY" }       // A request for all records
+        };
+
+        /// <summary>
+        /// 请求类别
+        /// </summary>
+        public static Dictionary<int, string> Class_dict = new Dictionary<int, string>()
+        {
+            {1, "IN" },         // the Internet
+            {2, "CS" },         // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)
+            {3, "CH" },         // the CHAOS class
+            {4, "HS" }          // Hesiod [Dyer 87]
+        };
+        /// <summary>
+        /// 域名
+        /// </summary>
+        public string? Name { get; set; }
+        /// <summary>
+        /// 记录类型
+        /// </summary>
+        public string? Type { get; set; }
+        /// <summary>
+        /// 数据类型
+        /// </summary>
+        public string? Class { get; set; }
+        /// <summary>
+        /// 生存周期
+        /// </summary>
+        public uint TTL { get; set; }
+        /// <summary>
+        /// 数据长度
+        /// </summary>
+        public ushort Data_length { get; set; }
+        /// <summary>
+        /// 数据的字节数据
+        /// </summary>
+        public byte[]? Data { get; set; } 
+    }
+
+
+    /*
+    /// <summary>
     /// DNS资源记录结构
     /// </summary>
     public class DNS_answerRR
@@ -153,6 +228,7 @@
             {15, "MX"},         // 邮件交换
             {16, "TXT" },       // text strings
             {28, "AAAA"},       // AAAA记录
+            {65, "HTTPS" },     // HTTPS
             {252, "AXFR"},      // A request for a transfer of an entire zone
             {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
             {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
@@ -195,4 +271,36 @@
         /// </summary>
         public string? Data { get; set; } 
     }
+
+    /// <summary>
+    /// 权威应答
+    /// </summary>
+    public class DNS_authorityRR
+    {
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string? Name { get; set; }
+        /// <summary>
+        /// 响应类型
+        /// </summary>
+        public ushort Type { get; set; }
+        /// <summary>
+        /// 响应类
+        /// </summary>
+        public ushort Class { get; set; }
+        /// <summary>
+        /// 生存周期
+        /// </summary>
+        public int TTL { get; set; }
+        /// <summary>
+        /// 数据长度
+        /// </summary>
+        public ushort Data_length { get; set; }
+        /// <summary>
+        /// 数据
+        /// </summary>
+        public byte[]? Data { get; set; }
+    }
+    */
 }

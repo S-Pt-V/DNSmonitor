@@ -1,3 +1,5 @@
+using DNSmonitor;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,5 +23,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.GetRequiredService<MonitorService>())
+{
+
+}
 
 app.Run();

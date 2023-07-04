@@ -43,7 +43,7 @@ namespace DNSmonitor
         static MonitorService()
         {
             rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
-            recv_buffer= new byte[recv_buffer_length];
+            recv_buffer = new byte[recv_buffer_length];
             keeplistening = true;
 
             ParameterizedThreadStart? ListenerStart = new((obj) =>
@@ -106,7 +106,7 @@ namespace DNSmonitor
             {
                 Listener.Start();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 keeplistening = false;
@@ -179,7 +179,7 @@ namespace DNSmonitor
                 Array.Copy(packet_bytes, 16, temp, 0, 4);
                 ip_packet.Dst_addr = new IPAddress(temp).ToString();
                 // 包头的选项部分
-                if(ip_packet.Header_length > 20)
+                if (ip_packet.Header_length > 20)
                 {
                     uint option_length = ip_packet.Header_length - 20;
                     ip_packet.Header_option = new byte[option_length];
@@ -213,7 +213,7 @@ namespace DNSmonitor
                 }
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 keeplistening = false;
@@ -243,18 +243,18 @@ namespace DNSmonitor
                 udp_datagram.Payload = new byte[payload_length];
                 Array.Copy(packet.Payload, 8, udp_datagram.Payload, 0, payload_length);
                 // Console.WriteLine("{0}:{1}\t->\t{2}:{3}\t{4}", packet.Src_addr, udp_datagram.Src_port.ToString(), packet.Dst_addr, udp_datagram.Dst_port.ToString(), udp_datagram.Payload.Length.ToString());
-                if(udp_datagram.Src_port == 53 || udp_datagram.Dst_port == 53)
+                if (udp_datagram.Src_port == 53 || udp_datagram.Dst_port == 53)
                 {
                     ResolveDNS(packet, udp_datagram);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 keeplistening = false;
             }
         }
-        
+
         /// <summary>
         /// 解析DNS数据包内容
         /// </summary>
@@ -301,7 +301,10 @@ namespace DNSmonitor
                     Additional_RRs = dns_datagram[10] * 256 + dns_datagram[11]
                 };
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
-                Console.WriteLine("Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}", dnsdata.Questions.ToString(), dnsdata.Answer_RRs.ToString(), dnsdata.Authority_RRs.ToString(), dnsdata.Additional_RRs.ToString());
+                Console.WriteLine(
+                    "Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}", 
+                    dnsdata.Questions.ToString(), dnsdata.Answer_RRs.ToString(), dnsdata.Authority_RRs.ToString(), dnsdata.Additional_RRs.ToString()
+                    );
 
                 // 解析请求部分
                 // 第一个query从第13字节开始，在字节数组中的位置为12 (好像一般都只有一个query)
@@ -328,15 +331,16 @@ namespace DNSmonitor
                         }
                         else
                         {
+                            index += 1;
                             break;
                         }
                     }
                     // 0x00 后的四个个字节为查询类型和查询类
-                    query.Type = DNS_query.Type_dict[(dns_datagram[index + 1] * 256 + dns_datagram[index + 2])];
-                    query.Class = DNS_query.Class_dict[(dns_datagram[index + 3] * 256 + dns_datagram[index + 4])];
+                    query.Type = DNS_query.Type_dict[(dns_datagram[index] * 256 + dns_datagram[index + 1])];
+                    query.Class = DNS_query.Class_dict[(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
                     dnsdata.Queries.Add(query);
                     // index直接指向下一个部分的开始
-                    index += 5;
+                    index += 4;
                 }
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.Queries.Count.ToString() + " queries:");
@@ -345,47 +349,299 @@ namespace DNSmonitor
                     Console.WriteLine("Name: " + query.Name + "\tType: " + query.Type + "\tClass: " + query.Class);
                 }
 
-                // 解析应答部分
-                /* if (dnsdata.Answer_RRs > 0)
+                // 所有的响应记录数量
+                int total_RRs = dnsdata.Answer_RRs + dnsdata.Authority_RRs + dnsdata.Additional_RRs;
+
+                dnsdata.AnswerRRs = new List<DNS_RR>(dnsdata.Answer_RRs);
+                dnsdata.AuthorityRRs = new List<DNS_RR>(dnsdata.Authority_RRs);
+                dnsdata.AdditionalRRs = new List<DNS_RR>(dnsdata.Additional_RRs);
+
+                for (int count = 0; count < total_RRs; count++)
                 {
-                    dnsdata.AnswerRRs = new List<DNS_answerRR>();
-                    for (int count = 0; count < dnsdata.Answer_RRs; count++)
+                    // Console.WriteLine("No.{0} RR", i.ToString());
+                    DNS_RR RR = new();
+                    for (; index < dns_datagram.Length;)
                     {
-                        // Console.WriteLine("getting number {0} answer", count.ToString());
-                        DNS_answerRR answer = new DNS_answerRR();
-                        // 前两位为11，为压缩表示方法，使用后续的14位表示该字段相对于数据报的偏移
-                        if ((dns_datagram[index] & 0b11000000) == 0xC0)
+                        // Console.WriteLine("Index: {0}\tlength: {1}", index.ToString(), dns_datagram[index].ToString());
+                        // 0x00表示结束
+                        if (dns_datagram[index] == 0)
                         {
-                            // 后14位为该字段相对于DNS头部的偏移
-                            int offset = (dns_datagram[index] & 0b00111111) * 256 + dns_datagram[index + 1];
-                            answer.Name = GetName(dns_datagram, offset);
-                            // answer.Type = (ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3]);
-                            // answer.Class = (ushort)(dns_datagram[index + 4] * 256 + dns_datagram[index + 5]);
-                            answer.Type = DNS_answerRR.Type_dict[(ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
-                            answer.Class = DNS_answerRR.Class_dict[(ushort)(dns_datagram[index + 4] * 256 + dns_datagram[index + 5])];
-                            answer.TTL = dns_datagram[index + 6] * 16777216 + dns_datagram[index + 7] * 65536 + dns_datagram[index + 8] * 256 + dns_datagram[index + 9];
-                            answer.Data_length = (ushort)(dns_datagram[index + 10] * 256 + dns_datagram[index + 11]);
-                            index += 12;
-                            byte[] answerdata = new byte[answer.Data_length];
-                            Array.Copy(dns_datagram, index, answerdata, 0, answer.Data_length);
-
-                            answer.Data = GetAnswerData((ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3]), (ushort)(dns_datagram[index + 4] * 256 + dns_datagram[index + 5]), answerdata, dns_datagram);
-
-                            index += answer.Data_length;
-                            dnsdata.AnswerRRs.Add(answer);
+                            // Console.WriteLine("end");
+                            index += 1;
+                            break;
+                        }
+                        // 前两位表示为压缩算法的指针
+                        else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                        {
+                            // Console.WriteLine("ptr");
+                            int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                            RR.Name += GetNameByPTR(dns_datagram, location);
+                            index += 2;
+                            break;
                         }
                         else
                         {
-                            Console.WriteLine("不对劲");
+                            // Console.WriteLine(dns_datagram[index].ToString());
+                            int length = dns_datagram[index];
+                            temp = new byte[length];
+                            Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                            RR.Name += Encoding.ASCII.GetString(temp);
+                            index += length + 1;
+                            if (dns_datagram[index] != 0)
+                            {
+                                RR.Name += ".";
+                            }
+                            else
+                            {
+                                index += 1;
+                                break;
+                            }
                         }
                     }
-                    Console.WriteLine("-------------------------------------------------------------------------------------------------");
-                    Console.WriteLine(dnsdata.AnswerRRs.Count.ToString() + " responses:");
-                    foreach (DNS_answerRR answer in dnsdata.AnswerRRs)
+                    int typeindex = index;
+                    RR.Type = DNS_RR.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+                    RR.Class = DNS_RR.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
+                    RR.TTL = (uint)(dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
+                    RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+                    index += 10;
+                    // Console.WriteLine(RR.Type+"\t"+RR.Class);
+                    RR.Data = new byte[RR.Data_length];
+                    Array.Copy(dns_datagram, index, RR.Data, 0, RR.Data_length);
+                    index += RR.Data_length;
+
+                    if (count < dnsdata.Answer_RRs)
                     {
-                        Console.WriteLine("Type: {0}\tClass: {1}\t TTL:{2}\tLength: {3}\tname:{4}", answer.Type, answer.Class, answer.TTL.ToString(), answer.Data_length.ToString(), answer.Name);
+                        dnsdata.AnswerRRs.Add(RR);
                     }
-                } */
+                    else if(count >= dnsdata.Answer_RRs && (count- dnsdata.Answer_RRs) < dnsdata.Authority_RRs)
+                    {
+                        dnsdata.AuthorityRRs.Add(RR);
+                    }
+                    else
+                    {
+                        dnsdata.AdditionalRRs.Add(RR);
+                    }
+
+                }
+                Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                Console.WriteLine(dnsdata.AnswerRRs.Count.ToString() + " answers RRs:");
+                foreach (DNS_RR RR in dnsdata.AnswerRRs)
+                {
+                    Console.WriteLine(
+                        "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
+                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                        );
+                }
+                Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                Console.WriteLine(dnsdata.AuthorityRRs.Count.ToString() + " authority RRs:");
+                foreach (DNS_RR RR in dnsdata.AuthorityRRs)
+                {
+                    Console.WriteLine(
+                        "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
+                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                        );
+                }
+                Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                Console.WriteLine(dnsdata.AdditionalRRs.Count.ToString() + " additional RRs:");
+                foreach (DNS_RR RR in dnsdata.AdditionalRRs)
+                {
+                    Console.WriteLine(
+                        "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
+                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                        );
+                }
+
+                /*
+                // 解析应答部分
+                if (dnsdata.Answer_RRs > 0)
+                {
+                    dnsdata.AnswerRRs = new List<DNS_answerRR>();
+                    for (int i = 0; i < dnsdata.Answer_RRs; i++)
+                    {
+                        // Console.WriteLine("No.{0} RR", i.ToString());
+                        DNS_answerRR RR = new();
+                        for (; index < dns_datagram.Length;)
+                        {
+                            // Console.WriteLine("Index: {0}\tlength: {1}", index.ToString(), dns_datagram[index].ToString());
+                            // 0x00表示结束
+                            if (dns_datagram[index] == 0)
+                            {
+                                // Console.WriteLine("end");
+                                index += 1;
+                                break;
+                            }
+                            // 前两位表示为压缩算法的指针
+                            else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                            {
+                                // Console.WriteLine("ptr");
+                                int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                                RR.Name += GetNameByPTR(dns_datagram, location);
+                                index += 2;
+                                break;
+                            }
+                            else
+                            {
+                                // Console.WriteLine(dns_datagram[index].ToString());
+                                int length = dns_datagram[index];
+                                temp = new byte[length];
+                                Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                                RR.Name += Encoding.ASCII.GetString(temp);
+                                index += length + 1;
+                                if (dns_datagram[index] != 0)
+                                {
+                                    RR.Name += ".";
+                                }
+                                else
+                                {
+                                    index += 1;
+                                    break;
+                                }
+                            }
+                        }
+                        int typeindex = index;
+                        RR.Type = DNS_answerRR.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+                        RR.Class = DNS_answerRR.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
+                        RR.TTL = dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7];
+                        RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+                        index += 10;
+                        // Console.WriteLine(RR.Type+"\t"+RR.Class);
+                        temp = new byte[RR.Data_length];
+                        Array.Copy(dns_datagram, index, temp, 0, RR.Data_length);
+                        RR.Data = Encoding.ASCII.GetString(temp);
+                        index += RR.Data_length;
+                        switch (dns_datagram[typeindex] * 256 + dns_datagram[typeindex + 1])
+                        {
+                            case 1:         // A
+                                break;
+                            case 2:         // NS
+                                break;
+                            case 3:         // MD
+                                break;
+                            case 5:         // CNAME
+                                break;
+                            case 6:         // SOA
+                                break;
+                            case 7:         // MB
+                                break;
+                            case 8:         // MG
+                                break;
+                            case 9:         // MR
+                                break;
+                            case 10:        // NULL
+                                break;
+                            case 11:        // WKS
+                                break;
+                            case 12:        // PTR
+                                break;
+                            case 13:        // HINFO
+                                break;
+                            case 15:        // MX
+                                break;
+                            case 16:        // TXT
+                                break;
+                            case 28:        // AAAA
+                                break;
+                            case 65:        // HTTPS
+                                break;
+                            case 252:       // AXFR
+                                break;
+                            case 253:       // MAILB
+                                break;
+                            case 254:       // MAILA
+                                break;
+                            case 255:       // ANY
+                                break;
+                            default:
+                                RR.Type = (dns_datagram[typeindex] * 256 + dns_datagram[typeindex + 1]).ToString();
+                                keeplistening = false;
+                                // Console.WriteLine("UNKNOWN type");
+                                break;
+                        }
+                        dnsdata.AnswerRRs.Add(RR);
+                    }
+                    Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                    Console.WriteLine(dnsdata.AnswerRRs.Count.ToString() + " answers:");
+                    foreach (DNS_answerRR RR in dnsdata.AnswerRRs)
+                    {
+                        Console.WriteLine(
+                            "Name: {0}\tType: {1}\tClass: {2}\tTTL: {3}\tData length: {4}",
+                            RR.Name, RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString()
+                            );
+                    }
+                }
+
+                // 权威应答
+                // 解析应答部分
+                if (dnsdata.Authority_RRs > 0)
+                {
+                    dnsdata.AuthorityRRs = new List<DNS_authorityRR>();
+                    for (int i = 0; i < dnsdata.Authority_RRs; i++)
+                    {
+                        // Console.WriteLine("No.{0} RR", i.ToString());
+                        DNS_authorityRR RR = new();
+                        for (; index < dns_datagram.Length;)
+                        {
+                            // Console.WriteLine("Index: {0}\tlength: {1}", index.ToString(), dns_datagram[index].ToString());
+                            // 0x00表示结束
+                            if (dns_datagram[index] == 0)
+                            {
+                                // Console.WriteLine("end");
+                                index += 1;
+                                break;
+                            }
+                            // 前两位表示为压缩算法的指针
+                            else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                            {
+                                // Console.WriteLine("ptr");
+                                int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                                RR.Name += GetNameByPTR(dns_datagram, location);
+                                index += 2;
+                                break;
+                            }
+                            else
+                            {
+                                // Console.WriteLine(dns_datagram[index].ToString());
+                                int length = dns_datagram[index];
+                                temp = new byte[length];
+                                Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                                RR.Name += Encoding.ASCII.GetString(temp);
+                                index += length + 1;
+                                if (dns_datagram[index] != 0)
+                                {
+                                    RR.Name += ".";
+                                }
+                                else
+                                {
+                                    index += 1;
+                                    break;
+                                }
+                            }
+                        }
+                        int typeindex = index;
+                        RR.Type = (ushort)(dns_datagram[index] * 256 + dns_datagram[index + 1]);
+                        RR.Class = (ushort)(dns_datagram[index + 2] * 256 + dns_datagram[index + 3]);
+                        RR.TTL = dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7];
+                        RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+                        index += 10;
+                        RR.Data = new byte[RR.Data_length];
+                        Array.Copy(dns_datagram, index, RR.Data, 0, RR.Data_length);
+                        index += RR.Data_length;
+                        
+                        dnsdata.AuthorityRRs.Add(RR);
+                    }
+                    Console.WriteLine("-------------------------------------------------------------------------------------------------");
+                    Console.WriteLine(dnsdata.AuthorityRRs.Count.ToString() + " authority RRs:");
+                    foreach (DNS_authorityRR RR in dnsdata.AuthorityRRs)
+                    {
+                        Console.WriteLine(
+                            "Name: {0}\tType: {1}\tClass: {2}\tTTL: {3}\tData length: {4}",
+                            RR.Name, RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString()
+                            );
+                        Console.WriteLine(BitConverter.ToString(RR.Data));
+                    }
+                }
+                */
+
             }
             catch (Exception e)
             {
@@ -394,6 +650,50 @@ namespace DNSmonitor
             }
         }
 
+        /// <summary>
+        /// 从指定位置获取域名，在检测到0xC?的指针后调用
+        /// </summary>
+        /// <param name="databytes">含有域名的字节数组</param>
+        /// <param name="index">域名记录的起始位置</param>
+        /// <returns></returns>
+        private static string GetNameByPTR(byte[] databytes, int index)
+        {
+            string result = "";
+
+            for (; index < databytes.Length;)
+            {
+                if ((databytes[index] & 0xC0) == 0xC0)
+                {
+                    int location = (databytes[index] & 0x3F) * 256 + databytes[index + 1];
+                    result += GetNameByPTR(databytes, location);
+                    break;
+                }
+                else if (databytes[index] == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    int length = databytes[index];
+                    temp = new byte[length];
+                    Array.Copy(databytes, index + 1, temp, 0, length);
+                    result += Encoding.ASCII.GetString(temp);
+                    index += length + 1;
+                    if (databytes[index] != 0)
+                    {
+                        result += ".";
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /*
         /// <summary>
         /// 从DNS数据包中取出请求名字
         /// </summary>
@@ -555,6 +855,6 @@ namespace DNSmonitor
             }
             // Console.WriteLine(result);
             return result;
-        }
+        }*/
     }
 }
