@@ -342,8 +342,8 @@ namespace DNSmonitor
                         }
                     }
                     // 0x00 后的四个个字节为查询类型和查询类
-                    query.Type = DNS_query.Type_dict[(dns_datagram[index] * 256 + dns_datagram[index + 1])];
-                    query.Class = DNS_query.Class_dict[(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
+                    query.Type = Q_tpye_class.Type_dict[(dns_datagram[index] * 256 + dns_datagram[index + 1])];
+                    query.Class = Q_tpye_class.Class_dict[(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
                     dnsdata.Queries.Add(query);
                     // index直接指向下一个部分的开始
                     index += 4;
@@ -405,8 +405,8 @@ namespace DNSmonitor
                         }
                     }
                     int typeindex = index;
-                    RR.Type = DNS_RR.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
-                    RR.Class = DNS_RR.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
+                    RR.Type = Q_tpye_class.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+                    RR.Class = Q_tpye_class.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
                     RR.TTL = (uint)(dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
                     RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
                     index += 10;

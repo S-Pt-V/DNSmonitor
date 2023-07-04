@@ -124,6 +124,13 @@
         /// 数据的字节数据
         /// </summary>
         public byte[]? Data { get; set; }
+    }
+
+    /// <summary>
+    /// dns请求类型和类别
+    /// </summary>
+    public class Q_tpye_class
+    {
         /// <summary>
         /// 请求类型
         /// </summary>
@@ -220,7 +227,7 @@
             {254, "MAILA" },
             {255, "ANY" },
             {256, "URI" },
-            {257, "CAA" },         
+            {257, "CAA" },
             {259, "DOA" },
 
             {32768, "TA" },
@@ -232,10 +239,13 @@
         /// </summary>
         public static Dictionary<int, string> Class_dict = new Dictionary<int, string>()
         {
-            {1, "IN" },         // the Internet
-            {2, "CS" },         // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)
-            {3, "CH" },         // the CHAOS class
-            {4, "HS" }          // Hesiod [Dyer 87]
+            {0, "Reserved" },
+            {1, "Internet" },
+            {2, "Unassigned" },
+            {3, "Chaos" },
+            {4, "Hesiod" },
+            {254, "QCLASS NONE" },
+            {255, "QCLASS * (ANY)" },
         };
     }
 }
