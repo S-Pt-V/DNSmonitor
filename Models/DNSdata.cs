@@ -82,44 +82,6 @@
     public class DNS_query
     {
         /// <summary>
-        /// 请求类型
-        /// </summary>
-        public static Dictionary<int, string> Type_dict = new Dictionary<int, string>()
-        {
-            {1, "A"},           // A记录，主机地址
-            {2, "NS"},          // Name Server记录
-            {3, "MD" },         // a mail destination (Obsolete - use MX)
-            {5, "CNAME"},       // CNAME 记录
-            {6, "SOA" },        // 起始授权
-            {7, "MB" },         // a mailbox domain name (EXPERIMENTAL)
-            {8, "MG" },         // a mail group member (EXPERIMENTAL)
-            {9, "MR" },         // a mail rename domain name
-            {10, "NULL" },      // a NULL RR (EXPERIMENTAL)
-            {11, "WKS" },       // a well known service description      
-            {12, "PTR"},        // 指针
-            {13, "HINFO"},      // 主机信息
-            {15, "MX"},         // 邮件交换
-            {16, "TXT" },       // text strings
-            {28, "AAAA"},       // AAAA记录
-            {65, "HTTPS" },     // HTTPS
-            {252, "AXFR"},      // A request for a transfer of an entire zone
-            {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
-            {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
-            {255, "ANY" }       // A request for all records
-        };
-
-        /// <summary>
-        /// 请求类别
-        /// </summary>
-        public static Dictionary<int, string> Class_dict = new Dictionary<int, string>()
-        {
-            {1, "IN" },         // the Internet
-            {2, "CS" },         // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)
-            {3, "CH" },         // the CHAOS class
-            {4, "HS" }          // Hesiod [Dyer 87]
-        };
-
-        /// <summary>
         /// 请求域名
         /// </summary>
         public string? Name { get; set; }
@@ -138,43 +100,6 @@
     /// </summary>
     public class DNS_RR
     {
-        /// <summary>
-        /// 请求类型
-        /// </summary>
-        public static Dictionary<int, string> Type_dict = new Dictionary<int, string>()
-        {
-            {1, "A"},           // A记录
-            {2, "NS"},          // Name Server记录
-            {3, "MD" },         // a mail destination (Obsolete - use MX)
-            {5, "CNAME"},       // CNAME 记录
-            {6, "SOA" },        // 起始授权
-            {7, "MB" },         // a mailbox domain name (EXPERIMENTAL)
-            {8, "MG" },         // a mail group member (EXPERIMENTAL)
-            {9, "MR" },         // a mail rename domain name
-            {10, "NULL" },      // a NULL RR (EXPERIMENTAL)
-            {11, "WKS" },       // a well known service description      
-            {12, "PTR"},        // 指针
-            {13, "HINFO"},      // 主机信息
-            {15, "MX"},         // 邮件交换
-            {16, "TXT" },       // text strings
-            {28, "AAAA"},       // AAAA记录
-            {65, "HTTPS" },     // HTTPS
-            {252, "AXFR"},      // A request for a transfer of an entire zone
-            {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
-            {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
-            {255, "ANY" }       // A request for all records
-        };
-
-        /// <summary>
-        /// 请求类别
-        /// </summary>
-        public static Dictionary<int, string> Class_dict = new Dictionary<int, string>()
-        {
-            {1, "IN" },         // the Internet
-            {2, "CS" },         // the CSNET class (Obsolete - used only for examples in some obsolete RFCs)
-            {3, "CH" },         // the CHAOS class
-            {4, "HS" }          // Hesiod [Dyer 87]
-        };
         /// <summary>
         /// 域名
         /// </summary>
@@ -198,41 +123,108 @@
         /// <summary>
         /// 数据的字节数据
         /// </summary>
-        public byte[]? Data { get; set; } 
-    }
-
-
-    /*
-    /// <summary>
-    /// DNS资源记录结构
-    /// </summary>
-    public class DNS_answerRR
-    {
+        public byte[]? Data { get; set; }
         /// <summary>
         /// 请求类型
         /// </summary>
         public static Dictionary<int, string> Type_dict = new Dictionary<int, string>()
         {
-            {1, "A"},           // A记录
-            {2, "NS"},          // Name Server记录
-            {3, "MD" },         // a mail destination (Obsolete - use MX)
-            {5, "CNAME"},       // CNAME 记录
-            {6, "SOA" },        // 起始授权
-            {7, "MB" },         // a mailbox domain name (EXPERIMENTAL)
-            {8, "MG" },         // a mail group member (EXPERIMENTAL)
-            {9, "MR" },         // a mail rename domain name
-            {10, "NULL" },      // a NULL RR (EXPERIMENTAL)
-            {11, "WKS" },       // a well known service description      
-            {12, "PTR"},        // 指针
-            {13, "HINFO"},      // 主机信息
-            {15, "MX"},         // 邮件交换
-            {16, "TXT" },       // text strings
-            {28, "AAAA"},       // AAAA记录
-            {65, "HTTPS" },     // HTTPS
-            {252, "AXFR"},      // A request for a transfer of an entire zone
-            {253, "MAILB" },    // A request for mailbox-related records (MB, MG or MR)
-            {254, "MAILA" },    // A request for mail agent RRs (Obsolete - see MX)
-            {255, "ANY" }       // A request for all records
+            {1, "A"},
+            {2, "NS" },
+            {3, "MD" },
+            {4, "MF" },
+            {5, "CNAME" },
+            {6, "SOA" },
+            {7, "MB" },
+            {8, "MG" },
+            {9, "MR" },
+            {10, "NULL" },
+
+            {11, "WKS" },
+            {12, "PTR"},
+            {13, "HINFO" },
+            {14, "MINFO" },
+            {15, "MX" },
+            {16, "TXT" },
+            {17, "RP" },
+            {18, "AFSDB" },
+            {19, "X25" },
+
+            {20, "ISDN" },
+            {21, "RT" },
+            {22, "NSAP" },
+            {23, "NSAP-PTR" },
+            {24, "SIG" },
+            {25, "KEY" },
+            {26, "PX" },
+            {27, "GPOS" },
+            {28, "AAAA" },
+            {29, "LOC" },
+
+            {30, "NXT" },
+            {31, "EID" },
+            {32, "NIMLOC/NB" },
+            {33, "SRV/NBSTAT" },
+            {34, "ATMA" },
+            {35, "NAPTR" },
+            {36, "KX" },
+            {37, "CERT" },
+            {38, "A6" },
+            {39, "DNAME" },
+
+            {40, "SINK" },
+            {41, "OPT" },
+            {42, "APL" },
+            {43, "DS" },
+            {44, "SSHFP" },
+            {45, "IPSECKEY" },
+            {46, "PRSIG" },
+            {47, "NSEC" },
+            {48, "DNSKEY" },
+            {49, "DHCID" },
+
+            {50, "NSEC3" },
+            {51, "NSEC3PARAM" },
+            {52, "TLSA" },
+            {53, "SMIMEA" },
+            {55, "HIP" },
+            {56, "NINFO" },
+            {57, "PKEY" },
+            {58, "TALINK" },
+            {59, "CDS" },
+
+            {60, "CDNSKEY" },
+            {61, "OPENPGPKEY" },
+            {62, "CSYNC" },
+            {63, "ZONEMD" },
+            {64, "SVCB" },
+            {65, "HTTPS" },
+
+            {99, "SPF"},
+            {100, "UINFO" },
+            {101, "UID" },
+            {102, "GID" },
+            {103, "UNSPEC" },
+            {104, "NID" },
+            {105, "L32" },
+            {106, "L64" },
+            {107, "LP" },
+            {108, "EUI48" },
+            {109, "EUI64" },
+
+            {249, "TKEY" },
+            {250, "TSIG" },
+            {251, "IXFR" },
+            {252, "AXFR" },
+            {253, "MAILB" },
+            {254, "MAILA" },
+            {255, "ANY" },
+            {256, "URI" },
+            {257, "CAA" },         
+            {259, "DOA" },
+
+            {32768, "TA" },
+            {32769, "DLV" },
         };
 
         /// <summary>
@@ -245,62 +237,5 @@
             {3, "CH" },         // the CHAOS class
             {4, "HS" }          // Hesiod [Dyer 87]
         };
-
-        /// <summary>
-        /// 域名
-        /// </summary>
-        public string? Name { get; set; }
-        /// <summary>
-        /// 类型
-        /// </summary>
-        public string? Type { get; set; }
-        /// <summary>
-        /// 类别
-        /// </summary>
-        public string? Class { get; set; }
-        /// <summary>
-        /// 生存周期
-        /// </summary>
-        public int TTL { get; set; }
-        /// <summary>
-        /// 数据长度
-        /// </summary>
-        public ushort Data_length { get; set; }
-        /// <summary>
-        /// 数据
-        /// </summary>
-        public string? Data { get; set; } 
     }
-
-    /// <summary>
-    /// 权威应答
-    /// </summary>
-    public class DNS_authorityRR
-    {
-        /// <summary>
-        /// 名称
-        /// </summary>
-        public string? Name { get; set; }
-        /// <summary>
-        /// 响应类型
-        /// </summary>
-        public ushort Type { get; set; }
-        /// <summary>
-        /// 响应类
-        /// </summary>
-        public ushort Class { get; set; }
-        /// <summary>
-        /// 生存周期
-        /// </summary>
-        public int TTL { get; set; }
-        /// <summary>
-        /// 数据长度
-        /// </summary>
-        public ushort Data_length { get; set; }
-        /// <summary>
-        /// 数据
-        /// </summary>
-        public byte[]? Data { get; set; }
-    }
-    */
 }

@@ -14,7 +14,7 @@ namespace DNSmonitor
     public class MonitorService
     {
         // 本机IP
-        const string loacl_ip = "10.200.1.97";
+        const string loacl_ip = "59.220.240.2";
         // 监听用的原始套接字
         private static readonly Socket rawsocket;
         // 接收缓冲区长度
@@ -453,12 +453,9 @@ namespace DNSmonitor
                 {
                     Console.WriteLine(
                         "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
-                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
-                        );
+                    RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                    );
                 }
-
-
-
             }
             catch (Exception e)
             {
