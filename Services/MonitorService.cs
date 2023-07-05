@@ -12,8 +12,8 @@ namespace DNSmonitor
         private readonly static ILogger<MonitorService> _logger;
         // 本机IP
         // const string local_ip = "59.220.240.2";
-        // const string local_ip = "192.168.51.214";
-        const string local_ip = "10.200.1.97";
+        const string local_ip = "192.168.51.214";
+        // const string local_ip = "10.200.1.97";
 
         // 监听用的原始套接字
         private static readonly Socket rawsocket;
