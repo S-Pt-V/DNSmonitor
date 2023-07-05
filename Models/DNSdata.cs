@@ -12,7 +12,7 @@
         /// <summary>
         /// 0b1xxxxxxx xxxxxxxx 第一位为0:query或者1:response
         /// </summary>
-        public int QR { get; set; }
+        public byte QR { get; set; }
         /// <summary>
         /// 0bx1111xxx xxxxxxxx 操作码，0:标准查询，1:反向查询，2:服务器状态请求
         /// </summary>
