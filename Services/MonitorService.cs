@@ -9,9 +9,11 @@ namespace DNSmonitor
     /// </summary>
     public class MonitorService
     {
+        private readonly static ILogger<MonitorService> _logger;
         // 本机IP
-        const string loacl_ip = "192.168.51.214";
-        // const string loacl_ip = "10.200.1.97";
+        // const string local_ip = "59.220.240.2";
+        // const string local_ip = "192.168.51.214";
+        const string local_ip = "10.200.1.97";
 
         // 监听用的原始套接字
         private static readonly Socket rawsocket;
@@ -74,8 +76,8 @@ namespace DNSmonitor
             {
                 //**************************************************************************************
                 // socket绑定到IP终结点
-                rawsocket.Bind(new IPEndPoint(IPAddress.Parse(loacl_ip), 0));
-                Console.WriteLine("Rawsocket binded on " + loacl_ip);
+                rawsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 0));
+                Console.WriteLine("Rawsocket binded on " + local_ip);
 
                 // 设置Rawsocket功能
                 Console.WriteLine("Set socket Option.");
@@ -279,7 +281,7 @@ namespace DNSmonitor
                 }
                 Console.WriteLine("\n\n*************************************************************************************************");
                 Console.WriteLine(BitConverter.ToString(datagram.Payload));
-
+                
                 // 复制udp数据报中的数据部分
                 byte[] dns_datagram = new byte[datagram.Payload.Length];
                 Array.Copy(datagram.Payload, 0, dns_datagram, 0, datagram.Payload.Length);
@@ -313,7 +315,7 @@ namespace DNSmonitor
                     "Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}",
                     dnsdata.Questions.ToString(), dnsdata.Answer_RRs.ToString(), dnsdata.Authority_RRs.ToString(), dnsdata.Additional_RRs.ToString()
                     );
-
+                
                 // 解析请求部分
                 // 第一个query从第13字节开始，在字节数组中的位置为12 (好像一般都只有一个query)
                 dnsdata.Queries = new List<DNS_query>();
@@ -321,7 +323,7 @@ namespace DNSmonitor
                 // 遍历每一个query
                 for (int count = 0; count < dnsdata.Questions; count++)
                 {
-                    // 一个query有多个标识符，每个标识符为一个字节数组
+                    // 域名部分
                     DNS_query query = new();
                     int length = 0;
                     // length + 1 为下一个标识符的长度的索引值
@@ -346,145 +348,75 @@ namespace DNSmonitor
                     // 0x00 后的四个个字节为查询类型和查询类
                     int type_byte = (dns_datagram[index] * 256 + dns_datagram[index + 1]);
                     int class_byte = (dns_datagram[index + 2] * 256 + dns_datagram[index + 3]);
-                    if (!Q_tpye_class.Type_dict.ContainsKey(type_byte))
-                    {
-                        query.Type = type_byte.ToString();
-                    }
-                    else
-                    {
-                        query.Type = type_byte.ToString();
-                    }
-                    if (!Q_tpye_class.Class_dict.ContainsKey(class_byte))
-                    {
-                        query.Class = class_byte.ToString();
-                    }
-                    else
-                    {
-                        query.Class = Q_tpye_class.Class_dict[(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
-                    }
+                    if (!Q_tpye_class.Type_dict.ContainsKey(type_byte)) query.Type = type_byte.ToString();
+                    else query.Type = type_byte.ToString();
+                    if (!Q_tpye_class.Class_dict.ContainsKey(class_byte)) query.Class = class_byte.ToString();
+                    else query.Class = Q_tpye_class.Class_dict[(dns_datagram[index + 2] * 256 + dns_datagram[index + 3])];
                     dnsdata.Queries.Add(query);
                     // index直接指向下一个部分的开始
                     index += 4;
                 }
+
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.Queries.Count.ToString() + " queries:");
-                foreach (DNS_query query in dnsdata.Queries)
-                {
-                    Console.WriteLine("Name: " + query.Name + "\tType: " + query.Type + "\tClass: " + query.Class);
-                }
-
+                foreach (DNS_query query in dnsdata.Queries) Console.WriteLine("Name: " + query.Name + "\tType: " + query.Type + "\tClass: " + query.Class);
+                
                 // 所有的响应记录数量
                 int total_RRs = dnsdata.Answer_RRs + dnsdata.Authority_RRs + dnsdata.Additional_RRs;
-                dnsdata.AnswerRRs = new List<DNS_RR>(dnsdata.Answer_RRs);
-                dnsdata.AuthorityRRs = new List<DNS_RR>(dnsdata.Authority_RRs);
-                dnsdata.AdditionalRRs = new List<DNS_RR>(dnsdata.Additional_RRs);
+                dnsdata.AnswerRRs = new List<DNS_AnswerRR>(dnsdata.Answer_RRs);
+                dnsdata.AuthorityRRs = new List<DNS_AuthorityRR>(dnsdata.Authority_RRs);
+                dnsdata.AdditionalRRs = new List<DNS_AdditionalRR>(dnsdata.Additional_RRs);
                 for (int count = 0; count < total_RRs; count++)
                 {
-                    // Console.WriteLine("No.{0} RR", i.ToString());
-                    DNS_RR RR = new();
-                    for (; index < dns_datagram.Length;)
-                    {
-                        // Console.WriteLine("Index: {0}\tlength: {1}", index.ToString(), dns_datagram[index].ToString());
-                        // 0x00表示结束
-                        if (dns_datagram[index] == 0)
-                        {
-                            // Console.WriteLine("end");
-                            index += 1;
-                            break;
-                        }
-                        // 前两位表示为压缩算法的指针
-                        else if ((dns_datagram[index] & 0xC0) == 0xC0)
-                        {
-                            // Console.WriteLine("ptr");
-                            int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
-                            RR.Name += GetNameByPTR(dns_datagram, location);
-                            index += 2;
-                            break;
-                        }
-                        else
-                        {
-                            // Console.WriteLine(dns_datagram[index].ToString());
-                            int length = dns_datagram[index];
-                            temp = new byte[length];
-                            Array.Copy(dns_datagram, index + 1, temp, 0, length);
-                            RR.Name += Encoding.ASCII.GetString(temp);
-                            index += length + 1;
-                            if (dns_datagram[index] != 0)
-                            {
-                                RR.Name += ".";
-                            }
-                            else
-                            {
-                                index += 1;
-                                break;
-                            }
-                        }
-                    }
-                    int typeindex = index;
-                    int type_byte = dns_datagram[index] * 256 + dns_datagram[index + 1];
-                    int class_byte = dns_datagram[index + 2] * 256 + dns_datagram[index + 3];
-
-                    if (!Q_tpye_class.Type_dict.ContainsKey(type_byte))
-                    {
-                        RR.Type = type_byte.ToString();
-                    }
-                    else
-                    {
-                        RR.Type = Q_tpye_class.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
-                    }
-
-                    if (!Q_tpye_class.Class_dict.ContainsKey(class_byte))
-                    {
-                        RR.Class = class_byte.ToString();
-                    }
-                    else
-                    {
-                        RR.Class = Q_tpye_class.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
-                    }
+                    int RRtype;
+                    if (count < dnsdata.Answer_RRs) RRtype = 0;
+                    else if (count < dnsdata.Answer_RRs + dnsdata.Authority_RRs) RRtype = 1;
+                    else RRtype = 2;
                     
-                    RR.TTL = (uint)(dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
-                    RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
-                    index += 10;
-                    // Console.WriteLine(RR.Type+"\t"+RR.Class);
-                    RR.Data = new byte[RR.Data_length];
-                    Array.Copy(dns_datagram, index, RR.Data, 0, RR.Data_length);
-                    index += RR.Data_length;
-
-                    if (count < dnsdata.Answer_RRs)
+                    switch (RRtype)
                     {
-                        dnsdata.AnswerRRs.Add(RR);
+                        case 0:         // 回答记录
+                            DNS_AnswerRR AnswRR = ResolveAnswer(dns_datagram, index);
+                            dnsdata.AnswerRRs.Add(AnswRR);
+                            index = AnswRR.Next;
+                            break;
+                        case 1:         // 权威应答
+                            DNS_AuthorityRR AuthRR = ResolveAuthority(dns_datagram, index);
+                            dnsdata.AuthorityRRs.Add(AuthRR);
+                            index = AuthRR.Next;
+                            break;
+                        case 2:         // 附加记录
+                            DNS_AdditionalRR AddiRR = ResolveAdditional(dns_datagram, index);
+                            dnsdata.AdditionalRRs.Add(AddiRR);
+                            index = AddiRR.Next;
+                            break;
+                        default:
+                            Console.WriteLine("UNKNOWN RR type.");
+                            return;
+                            // break;
                     }
-                    else if (count >= dnsdata.Answer_RRs && (count - dnsdata.Answer_RRs) < dnsdata.Authority_RRs)
-                    {
-                        dnsdata.AuthorityRRs.Add(RR);
-                    }
-                    else
-                    {
-                        dnsdata.AdditionalRRs.Add(RR);
-                    }
-
                 }
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.AnswerRRs.Count.ToString() + " answers RRs:");
-                foreach (DNS_RR RR in dnsdata.AnswerRRs)
+                foreach (DNS_AnswerRR RR in dnsdata.AnswerRRs)
                 {
                     Console.WriteLine(
                         "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
-                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Rdata_length.ToString(), RR.Name
                         );
                 }
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.AuthorityRRs.Count.ToString() + " authority RRs:");
-                foreach (DNS_RR RR in dnsdata.AuthorityRRs)
+                foreach (DNS_AuthorityRR RR in dnsdata.AuthorityRRs)
                 {
                     Console.WriteLine(
                         "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
-                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Data_length.ToString(), RR.Name
+                        RR.Type, RR.Class, RR.TTL.ToString(), RR.Rdata_length.ToString(), RR.Name
                         );
                 }
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.AdditionalRRs.Count.ToString() + " additional RRs:");
-                foreach (DNS_RR RR in dnsdata.AdditionalRRs)
+                foreach (DNS_AdditionalRR RR in dnsdata.AdditionalRRs)
                 {
                     Console.WriteLine(
                         "Type: {0}\tClass: {1}\tTTL: {2}\tData length: {3}\tName: {4}",
@@ -540,6 +472,203 @@ namespace DNSmonitor
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 解析回答资源记录
+        /// </summary>
+        /// <param name="dns_datagram">完整DNS包的字节数据</param>
+        /// <param name="index">需要解析的记录的第一个字节在字节数据中的索引值</param>
+        /// <returns></returns>
+        private static DNS_AnswerRR ResolveAnswer(byte[] dns_datagram, int index)
+        {
+            DNS_AnswerRR RR = new DNS_AnswerRR();
+            // Name
+            for (; index < dns_datagram.Length;)
+            {
+                // 0x00表示结束
+                if (dns_datagram[index] == 0)
+                {
+                    index += 1;
+                    break;
+                }
+                // 前两位表示为压缩算法的指针
+                else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                {
+                    int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                    RR.Name += GetNameByPTR(dns_datagram, location);
+                    index += 2;
+                    break;
+                }
+                // 该字节为该标识符的长度
+                else
+                {
+                    int length = dns_datagram[index];
+                    temp = new byte[length];
+                    Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                    RR.Name += Encoding.ASCII.GetString(temp);
+                    index += length + 1;
+                    if (dns_datagram[index] != 0)
+                    {
+                        RR.Name += ".";
+                    }
+                    else
+                    {
+                        index += 1;
+                        break;
+                    }
+                }
+            }
+            // Type
+            int type_byte = dns_datagram[index] * 256 + dns_datagram[index + 1];
+            if (!Q_tpye_class.Type_dict.ContainsKey(type_byte)) RR.Type = type_byte.ToString();
+            else RR.Type = Q_tpye_class.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+            // Class
+            int class_byte = dns_datagram[index + 2] * 256 + dns_datagram[index + 3];
+            if (!Q_tpye_class.Class_dict.ContainsKey(class_byte)) RR.Class = class_byte.ToString();
+            else RR.Class = Q_tpye_class.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
+            // TTL
+            RR.TTL = (uint)(dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
+            // Rdata length
+            RR.Rdata_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+            index += 10;
+            // Data
+            RR.Rdata = new byte[RR.Rdata_length];
+            Array.Copy(dns_datagram, index, RR.Rdata, 0, RR.Rdata_length);
+            index += RR.Rdata_length;
+            RR.Next = index;
+            return RR;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dns_datagram"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private static DNS_AuthorityRR ResolveAuthority(byte[] dns_datagram, int index)
+        {
+            DNS_AuthorityRR RR = new DNS_AuthorityRR();
+            // Name
+            for (; index < dns_datagram.Length;)
+            {
+                // 0x00表示结束
+                if (dns_datagram[index] == 0)
+                {
+                    index += 1;
+                    break;
+                }
+                // 前两位表示为压缩算法的指针
+                else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                {
+                    int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                    RR.Name += GetNameByPTR(dns_datagram, location);
+                    index += 2;
+                    break;
+                }
+                // 该字节为该标识符的长度
+                else
+                {
+                    int length = dns_datagram[index];
+                    temp = new byte[length];
+                    Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                    RR.Name += Encoding.ASCII.GetString(temp);
+                    index += length + 1;
+                    if (dns_datagram[index] != 0)
+                    {
+                        RR.Name += ".";
+                    }
+                    else
+                    {
+                        index += 1;
+                        break;
+                    }
+                }
+            }
+            // Type
+            int type_byte = dns_datagram[index] * 256 + dns_datagram[index + 1];
+            if (!Q_tpye_class.Type_dict.ContainsKey(type_byte)) RR.Type = type_byte.ToString();
+            else RR.Type = Q_tpye_class.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+            // Class
+            int class_byte = dns_datagram[index + 2] * 256 + dns_datagram[index + 3];
+            if (!Q_tpye_class.Class_dict.ContainsKey(class_byte)) RR.Class = class_byte.ToString();
+            else RR.Class = Q_tpye_class.Type_dict[dns_datagram[index + 2] * 256 + dns_datagram[index + 3]];
+            // TTL
+            RR.TTL = (uint)(dns_datagram[index + 4] * 16777216 + dns_datagram[index + 5] * 65536 + dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
+            // Data length
+            RR.Rdata_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+            index += 10;
+            // Data
+            RR.Rdata = new byte[RR.Rdata_length];
+            Array.Copy(dns_datagram, index, RR.Rdata, 0, RR.Rdata_length);
+            index += RR.Rdata_length;
+            RR.Next = index;
+            return RR;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dns_datagram"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private static DNS_AdditionalRR ResolveAdditional(byte[] dns_datagram, int index)
+        {
+            DNS_AdditionalRR RR = new DNS_AdditionalRR();
+            // Name
+            for (; index < dns_datagram.Length;)
+            {
+                // 0x00表示结束
+                if (dns_datagram[index] == 0)
+                {
+                    index += 1;
+                    break;
+                }
+                // 前两位表示为压缩算法的指针
+                else if ((dns_datagram[index] & 0xC0) == 0xC0)
+                {
+                    int location = (int)((dns_datagram[index] & 0x3F) * 256 + dns_datagram[index + 1]);
+                    RR.Name += GetNameByPTR(dns_datagram, location);
+                    index += 2;
+                    break;
+                }
+                // 该字节为该标识符的长度
+                else
+                {
+                    int length = dns_datagram[index];
+                    temp = new byte[length];
+                    Array.Copy(dns_datagram, index + 1, temp, 0, length);
+                    RR.Name += Encoding.ASCII.GetString(temp);
+                    index += length + 1;
+                    if (dns_datagram[index] != 0)
+                    {
+                        RR.Name += ".";
+                    }
+                    else
+                    {
+                        index += 1;
+                        break;
+                    }
+                }
+            }
+            // Type
+            int type_byte = dns_datagram[index] * 256 + dns_datagram[index + 1];
+            if (!Q_tpye_class.Type_dict.ContainsKey(type_byte)) RR.Type = type_byte.ToString();
+            else RR.Type = Q_tpye_class.Type_dict[dns_datagram[index] * 256 + dns_datagram[index + 1]];
+            // UDP payload size
+            RR.UDP_ps = (ushort)(dns_datagram[index + 2] *256 + dns_datagram[index + 3]);
+            // Higher bits in extended RCODE
+            RR.Higher_bits_in_rcode = dns_datagram[index + 4];
+            // EDNS0 version
+            RR.EDNS0_version = dns_datagram[index + 5];
+            // Z
+            RR.Z = (ushort)(dns_datagram[index + 6] * 256 + dns_datagram[index + 7]);
+            // Data Length
+            RR.Data_length = (ushort)(dns_datagram[index + 8] * 256 + dns_datagram[index + 9]);
+            index += 10;
+
+            RR.Next = index;
+            return RR;
         }
     }
 }

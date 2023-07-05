@@ -65,15 +65,15 @@
         /// <summary>
         /// 资源记录
         /// </summary>
-        public List<DNS_RR>? AnswerRRs { get; set; }
+        public List<DNS_AnswerRR>? AnswerRRs { get; set; }
         /// <summary>
         /// 权威应答列表
         /// </summary>
-        public List<DNS_RR>? AuthorityRRs { get; set; }
+        public List<DNS_AuthorityRR>? AuthorityRRs { get; set; }
         /// <summary>
         /// 额外记录
         /// </summary>
-        public List<DNS_RR>? AdditionalRRs { get; set; }
+        public List<DNS_AdditionalRR>? AdditionalRRs { get; set; }
     }
 
     /// <summary>
@@ -119,11 +119,64 @@
         /// <summary>
         /// 数据长度
         /// </summary>
-        public ushort Data_length { get; set; }
+        public ushort Rdata_length { get; set; }
         /// <summary>
         /// 数据的字节数据
         /// </summary>
-        public byte[]? Data { get; set; }
+        public byte[]? Rdata { get; set; }
+    }
+
+    /// <summary>
+    /// 回答资源记录
+    /// </summary>
+    public class DNS_AnswerRR : DNS_RR
+    {
+        /// <summary>
+        /// 指向下一部分的开头
+        /// </summary>
+        public int Next { get; set; }
+    }
+
+    /// <summary>
+    /// 权威应答资源记录
+    /// </summary>
+    public class DNS_AuthorityRR : DNS_RR
+    {
+        /// <summary>
+        /// 指向下一部分的开头
+        /// </summary>
+        public int Next { get; set; }
+    }
+
+    /// <summary>
+    /// 附加记录
+    /// </summary>
+    public class DNS_AdditionalRR : DNS_RR
+    {
+        /// <summary>
+        /// 指向下一部分的开头
+        /// </summary>
+        public int Next { get; set; }
+        /// <summary>
+        /// UDP payload size
+        /// </summary>
+        public ushort UDP_ps { get; set; }
+        /// <summary>
+        /// Higher bits in extedned RCODE
+        /// </summary>
+        public byte Higher_bits_in_rcode { get; set; }
+        /// <summary>
+        /// EDNS0 version
+        /// </summary>
+        public byte EDNS0_version { get; set; }
+        /// <summary>
+        /// Z
+        /// </summary>
+        public ushort Z { get; set; }
+        /// <summary>
+        /// Data length
+        /// </summary>
+        public ushort Data_length { get; set; }
     }
 
     /// <summary>
