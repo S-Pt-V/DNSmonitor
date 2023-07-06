@@ -12,13 +12,8 @@ namespace DNSmonitor
         // private readonly static ILogger<MonitorService> _logger;
 
         // 本机IP
-<<<<<<< HEAD
         // const string local_ip = "59.220.240.2";
         const string local_ip = "192.168.51.214";
-=======
-        const string local_ip = "59.220.240.2";
-        // const string local_ip = "192.168.51.214";
->>>>>>> a834fed240058eb02c61566bc192716757d3078b
         // const string local_ip = "10.200.1.97";
 
         // 监听用的原始套接字
@@ -49,33 +44,31 @@ namespace DNSmonitor
         private static readonly Socket udpsocket;
 
         // Syslog相关参数
-        private static readonly string syslog_ip = "59.220.216.129";
+        // private static readonly string syslog_ip = "59.220.216.129";
+        private static readonly string syslog_ip = "192.168.51.214";
         private static readonly int port = 51456;
         private static readonly EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
         static MonitorService()
         {
+            keeplistening = true;
             // 原始套接字初始化
             rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
             recv_buffer = new byte[recv_buffer_length];
-            keeplistening = true;
-
             // udp套接字初始化
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Bind(new IPEndPoint(IPAddress.Any, 55144));
-
+            // 监听线程设置
             ParameterizedThreadStart? ListenerStart = new((obj) =>
             {
                 if (!SocketSetup())
                 {
-                    // _logger.LogError("rawsocket setup failed.");
                     Console.WriteLine("rawsocket setup failed.");
                     return;
                 }
                 RawsocketListen();
             });
             Listener = new Thread(ListenerStart);
-            // Listener.Start();
         }
 
         private static bool SocketSetup()
@@ -402,7 +395,7 @@ namespace DNSmonitor
                 }
                 
                 return;
-
+                /*
                 // 所有的响应记录数量
                 int total_RRs = dnsdata.Answer_RRs + dnsdata.Authority_RRs + dnsdata.Additional_RRs;
                 dnsdata.AnswerRRs = new List<DNS_AnswerRR>(dnsdata.Answer_RRs);
@@ -438,6 +431,7 @@ namespace DNSmonitor
                             // break;
                     }
                 }
+                */
             }
             catch (Exception e)
             {
