@@ -9,12 +9,10 @@ namespace DNSmonitor
     /// </summary>
     public class MonitorService
     {
-        // private readonly static ILogger<MonitorService> _logger;
-
         // 本机IP
         // const string local_ip = "59.220.240.2";
-        const string local_ip = "192.168.51.214";
-        // const string local_ip = "10.200.1.97";
+        // const string local_ip = "192.168.51.214";
+        const string local_ip = "10.200.1.125";
 
         // 监听用的原始套接字
         private static readonly Socket rawsocket;
@@ -44,8 +42,9 @@ namespace DNSmonitor
         private static readonly Socket udpsocket;
 
         // Syslog相关参数
+        private static readonly string syslog_ip = "10.200.0.141";
         // private static readonly string syslog_ip = "59.220.216.129";
-        private static readonly string syslog_ip = "192.168.51.214";
+        // private static readonly string syslog_ip = "192.168.51.214";
         private static readonly int port = 51456;
         private static readonly EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
@@ -137,8 +136,6 @@ namespace DNSmonitor
                     int recved = rawsocket.Receive(recv_buffer);
                     byte[] databytes = new byte[recved];
                     Array.Copy(recv_buffer, 0, databytes, 0, recved);
-                    // Console.WriteLine("{0} bytes data received", recved.ToString());
-                    // Console.WriteLine(BitConverter.ToString(databytes));
                     // 解析IP数据包中的数据
                     ResloveIPPacket(databytes, recved);
                 }
