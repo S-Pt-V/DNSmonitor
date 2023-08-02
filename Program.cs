@@ -51,6 +51,6 @@ app.MapControllers();
 
 app.UseCors("Cors");
 
-// MonitorService.StratListen();
+MonitorService.StratListen();
 
 app.Run();

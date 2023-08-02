@@ -31,15 +31,5 @@ namespace DNSmonitor.Controllers
             }
             return Ok(addrlist);
         }
-
-        /// <summary>
-        /// 获取当前配置
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public ActionResult GetCurrentConf()
-        {
-            return Ok();
-        }
     }
 }

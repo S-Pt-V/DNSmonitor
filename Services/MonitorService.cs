@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using DNSmonitor.Models;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -44,6 +45,9 @@ namespace DNSmonitor
         private static int port = 51456;
         private static EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         static MonitorService()
         {
             keeplistening = true;
@@ -56,22 +60,11 @@ namespace DNSmonitor
             // 监听线程设置
             ParameterizedThreadStart? ListenerStart = new((obj) =>
             {
-                if (!SocketSetup())
+                /*if (!SocketSetup())
                 {
                     Console.WriteLine("rawsocket setup failed.");
                     return;
-                }
-                RawsocketListen();
-            });
-            Listener = new Thread(ListenerStart);
-        }
-
-        private static bool SocketSetup()
-        {
-            try
-            {
-                //**************************************************************************************
-                // socket绑定到IP终结点
+                }*/
                 rawsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 0));
                 Console.WriteLine("Rawsocket binded on " + local_ip);
 
@@ -86,21 +79,28 @@ namespace DNSmonitor
                 if (ret_code != 0)
                 {
                     Console.WriteLine("ret_code not 0 --SetSocketOption");
-                    return false;
+                    return;
                 }
                 Console.WriteLine("Socket option set.");
+                RawsocketListen();
+            });
+            Listener = new Thread(ListenerStart);
+        }
 
-                //**************************************************************************************
-                // Console.WriteLine("Udpsocket created");
-                //udpsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 51144));
-                // Console.WriteLine("Udpsocket binded");
-                return true;
-            }
-            catch (Exception e)
+        /// <summary>
+        /// 获取监听器当前运行状态
+        /// </summary>
+        public static MonitorState GetState()
+        {
+            MonitorState state = new()
             {
-                Console.WriteLine(e.ToString());
-                return false;
-            }
+                Listen_ip = local_ip,
+                Syslog_ip = syslog_ip,
+                Syslog_port = port,
+                ThreadState = Listener.ThreadState.ToString(),
+                Keeplisten = keeplistening
+            };
+            return state;
         }
 
         /// <summary>
@@ -700,5 +700,48 @@ namespace DNSmonitor
 
             return RR;
         }
+
+        /*
+        /// <summary>
+        /// 设置socket
+        /// </summary>
+        /// <returns></returns>
+        private static bool SocketSetup()
+        {
+            try
+            {
+                //**************************************************************************************
+                // socket绑定到IP终结点
+                rawsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 0));
+                Console.WriteLine("Rawsocket binded on " + local_ip);
+
+                // 设置Rawsocket功能
+                Console.WriteLine("Set socket Option.");
+                rawsocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.HeaderIncluded, 1);
+                byte[] IN = new byte[4] { 1, 0, 0, 0 };
+                byte[] OUT = new byte[4];
+
+                int ret_code = rawsocket.IOControl(SIO_R, IN, OUT);
+                ret_code = OUT[0] + OUT[1] + OUT[2] + OUT[3];
+                if (ret_code != 0)
+                {
+                    Console.WriteLine("ret_code not 0 --SetSocketOption");
+                    return false;
+                }
+                Console.WriteLine("Socket option set.");
+
+                //**************************************************************************************
+                // Console.WriteLine("Udpsocket created");
+                //udpsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 51144));
+                // Console.WriteLine("Udpsocket binded");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+        }
+        */
     }
 }
