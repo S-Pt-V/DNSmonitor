@@ -11,7 +11,6 @@ namespace DNSmonitor.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-
         struct Address {
             public string Addr { get; set; }
             public string Addrfamily { get; set; }
