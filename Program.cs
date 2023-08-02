@@ -4,12 +4,25 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+#region cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+            name: "Cors",
+            build =>
+            {
+                build.WithOrigins("*", "*", "*")
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            }
+        );
+});
+#endregion
 
 /*
 #region Serilog
@@ -35,6 +48,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("Cors");
 
 // MonitorService.StratListen();
 

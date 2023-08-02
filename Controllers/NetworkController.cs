@@ -11,10 +11,6 @@ namespace DNSmonitor.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        struct Address {
-            public string Addr { get; set; }
-            public string Addrfamily { get; set; }
-        }
         /// <summary>
         /// 获取所有网卡地址
         /// </summary>
@@ -22,19 +18,28 @@ namespace DNSmonitor.Controllers
         [HttpGet]
         public ActionResult GetAllAddress()
         {
-            List<Address> addrlist = new();
+            List<string> addrlist = new();
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
             foreach(IPAddress entry in host.AddressList)
             {
                 Console.WriteLine("{0}\t{1}", entry.AddressFamily.ToString(), entry.ToString());
-                Address addr = new()
+                if (entry.AddressFamily.ToString() == "InterNetwork")
                 {
-                    Addr = entry.ToString(),
-                    Addrfamily = entry.AddressFamily.ToString()
-                };
-                addrlist.Add(addr);
+                    Console.WriteLine("Add {0}", entry.ToString());
+                    addrlist.Add(entry.ToString());
+                }
             }
             return Ok(addrlist);
+        }
+
+        /// <summary>
+        /// 获取当前配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult GetCurrentConf()
+        {
+            return Ok();
         }
     }
 }

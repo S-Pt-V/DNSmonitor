@@ -9,15 +9,13 @@ namespace DNSmonitor
     /// </summary>
     public class MonitorService
     {
-        // 本机IP
-        // const string local_ip = "59.220.240.2";
-        // const string local_ip = "192.168.51.214";
+        // 本机监听的IP地址
         const string local_ip = "10.200.1.125";
 
         // 监听用的原始套接字
-        private static readonly Socket rawsocket;
+        private static Socket rawsocket;
         // 接收缓冲区长度
-        private const int recv_buffer_length = 65536;
+        private static int recv_buffer_length = 65536;
         // 接收缓冲区
         private static byte[] recv_buffer;
         // 原始套接字设置参数
@@ -42,9 +40,9 @@ namespace DNSmonitor
         private static readonly Socket udpsocket;
 
         // Syslog相关参数
-        private static readonly string syslog_ip = "10.200.0.141";
-        private static readonly int port = 51456;
-        private static readonly EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
+        private static string syslog_ip = "10.200.0.141";
+        private static int port = 51456;
+        private static EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
         static MonitorService()
         {
@@ -118,6 +116,21 @@ namespace DNSmonitor
             {
                 Console.WriteLine(e.ToString());
                 keeplistening = false;
+            }
+        }
+
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        public static void StopListen()
+        {
+            try
+            {
+                keeplistening = false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
         }
 
