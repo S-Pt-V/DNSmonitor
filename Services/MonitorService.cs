@@ -43,8 +43,6 @@ namespace DNSmonitor
 
         // Syslog相关参数
         private static readonly string syslog_ip = "10.200.0.141";
-        // private static readonly string syslog_ip = "59.220.216.129";
-        // private static readonly string syslog_ip = "192.168.51.214";
         private static readonly int port = 51456;
         private static readonly EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
@@ -95,9 +93,9 @@ namespace DNSmonitor
                 Console.WriteLine("Socket option set.");
 
                 //**************************************************************************************
-                Console.WriteLine("Udpsocket created");
+                // Console.WriteLine("Udpsocket created");
                 //udpsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 51144));
-                Console.WriteLine("Udpsocket binded");
+                // Console.WriteLine("Udpsocket binded");
                 return true;
             }
             catch (Exception e)
