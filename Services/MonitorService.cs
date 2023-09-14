@@ -11,7 +11,8 @@ namespace DNSmonitor
     public class MonitorService
     {
         // 本机监听的IP地址
-        const string local_ip = "10.200.1.125";
+        // const string local_ip = "10.200.1.125";
+        const string local_ip = "192.168.51.214";
 
         // 监听用的原始套接字
         private static Socket rawsocket;

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TEYAAet4Pj3/WamAOcR5w+WtdbQ9hu2e1lqgzQsP7tktkw2AysGxJcDQfcQVX3iGbvKeXJ0nJkYfwE4GPaMPEg==",
+  "dgSpecHash": "Tm7zvY4EFzvFNGJJI/cvBz+eEPndb6CjI+u967P502HrtS+DqNUbXqG9YIrvFZIJ9BFpkqDfTZwougLPGFPjrA==",
   "success": true,
-  "projectFilePath": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
+  "projectFilePath": "D:\\Projects\\5-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\S_Pt_V\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "C:\\Users\\S_Pt_V\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\7.0.0\\microsoft.extensions.configuration.abstractions.7.0.0.nupkg.sha512",

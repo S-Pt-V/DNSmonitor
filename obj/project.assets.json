@@ -1594,11 +1594,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
+      "projectUniqueName": "D:\\Projects\\5-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
       "projectName": "DNSmonitor",
-      "projectPath": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
+      "projectPath": "D:\\Projects\\5-DNSmonitor\\DNSmonitor\\DNSmonitor.csproj",
       "packagesPath": "C:\\Users\\S_Pt_V\\.nuget\\packages\\",
-      "outputPath": "D:\\Projects\\8-DNSmonitor\\DNSmonitor\\obj\\",
+      "outputPath": "D:\\Projects\\5-DNSmonitor\\DNSmonitor\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
