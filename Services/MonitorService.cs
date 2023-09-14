@@ -11,7 +11,6 @@ namespace DNSmonitor
     public class MonitorService
     {
         // 本机监听的IP地址
-        // const string local_ip = "10.200.1.125";
         const string local_ip = "192.168.51.214";
 
         // 监听用的原始套接字
@@ -27,7 +26,7 @@ namespace DNSmonitor
         // 监听线程
         private static readonly Thread Listener;
         // 持续监听
-        private static bool keeplistening;
+        private static bool listeninng;
 
         // IP数据包中的信息
         private static Packet? ip_packet;
@@ -42,7 +41,7 @@ namespace DNSmonitor
         private static readonly Socket udpsocket;
 
         // Syslog相关参数
-        private static string syslog_ip = "10.200.0.141";
+        private static string syslog_ip = "192.168.51.214";
         private static int port = 51456;
         private static EndPoint QIMING = new IPEndPoint(IPAddress.Parse(syslog_ip), port);
 
@@ -51,7 +50,7 @@ namespace DNSmonitor
         /// </summary>
         static MonitorService()
         {
-            keeplistening = true;
+            listeninng = true;
             // 原始套接字初始化
             rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
             recv_buffer = new byte[recv_buffer_length];
@@ -61,11 +60,6 @@ namespace DNSmonitor
             // 监听线程设置
             ParameterizedThreadStart? ListenerStart = new((obj) =>
             {
-                /*if (!SocketSetup())
-                {
-                    Console.WriteLine("rawsocket setup failed.");
-                    return;
-                }*/
                 rawsocket.Bind(new IPEndPoint(IPAddress.Parse(local_ip), 0));
                 Console.WriteLine("Rawsocket binded on " + local_ip);
 
@@ -99,7 +93,7 @@ namespace DNSmonitor
                 Syslog_ip = syslog_ip,
                 Syslog_port = port,
                 ThreadState = Listener.ThreadState.ToString(),
-                Keeplisten = keeplistening
+                Listening = listeninng
             };
             return state;
         }
@@ -116,7 +110,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                keeplistening = false;
+                listeninng = false;
             }
         }
 
@@ -127,7 +121,9 @@ namespace DNSmonitor
         {
             try
             {
-                keeplistening = false;
+                listeninng = false;
+                rawsocket.Close();
+                rawsocket.Dispose();
             }
             catch (Exception e)
             {
@@ -140,7 +136,7 @@ namespace DNSmonitor
         /// </summary>
         private static void RawsocketListen()
         {
-            while (keeplistening)
+            while (listeninng)
             {
                 try
                 {
@@ -149,12 +145,13 @@ namespace DNSmonitor
                     byte[] databytes = new byte[recved];
                     Array.Copy(recv_buffer, 0, databytes, 0, recved);
                     // 解析IP数据包中的数据
+                    // 新建线程处理
                     ResloveIPPacket(databytes, recved);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
-                    keeplistening = false;
+                    listeninng = false;
                     return;
                 }
             }
@@ -236,7 +233,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                keeplistening = false;
+                listeninng = false;
             }
         }
 
@@ -271,7 +268,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                keeplistening = false;
+                listeninng = false;
             }
         }
 
@@ -445,7 +442,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                keeplistening = false;
+                listeninng = false;
             }
         }
 

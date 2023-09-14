@@ -24,6 +24,6 @@
         /// <summary>
         /// 是否持续监听
         /// </summary>
-        public Boolean? Keeplisten { get; set; }
+        public Boolean? Listening { get; set; }
     }
 }
