@@ -1,6 +1,5 @@
-
-using DNSmonitor;
-using Serilog;
+using DNSmonitor.Services;
+// using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +8,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 #region cors
+/*
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -22,8 +22,10 @@ builder.Services.AddCors(options =>
             }
         );
 });
+*/
 #endregion
 
+#region Serilog
 /*
 #region Serilog
 builder.Host.UseSerilog((context, logger) =>
@@ -33,6 +35,7 @@ builder.Host.UseSerilog((context, logger) =>
 });
 #endregion
 */
+#endregion
 
 var app = builder.Build();
 
@@ -49,8 +52,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("Cors");
+// app.UseCors("Cors");
 
-MonitorService.StratListen();
+MonitorService.CapturePacket();
+Console.ReadKey();
+MonitorService.StopCapture();
 
 app.Run();
