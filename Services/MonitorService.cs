@@ -114,17 +114,20 @@ namespace DNSmonitor.Services
             switch(packet.Protocol)
             {
                 case (ushort)IIIProtocol.ICMP:
-                    Console.WriteLine("ICMP");
+                    // Console.WriteLine("ICMP");
                     break;
                 case (ushort)IIIProtocol.IGMP:
-                    Console.WriteLine("IGMP");
+                    // Console.WriteLine("IGMP");
                     break;
                 case (ushort)IIIProtocol.TCP:
-                    Console.WriteLine("TCP");
+                    // Console.WriteLine("TCP");
                     break;
                 case (ushort)IIIProtocol.UDP:
                     UDPdatagram datagram = ResolveService.UDPdatagramResolve(packet.Data);
-                    Console.WriteLine("{0}:{1}\t->\t{2}:{3}\t{4} Bytes", packet.Src_addr, datagram.Src_port, packet.Dst_addr, datagram.Dst_port, datagram.Data.Length);
+                    if (datagram.Src_port == 53 || datagram.Dst_port == 53)
+                    {
+                        Console.WriteLine("{0}:{1}\t->\t{2}:{3}\t{4} Bytes", packet.Src_addr, datagram.Src_port, packet.Dst_addr, datagram.Dst_port, datagram.Data.Length);
+                    }
                     break;
                 default:
                     Console.WriteLine("UNKNOWN");
