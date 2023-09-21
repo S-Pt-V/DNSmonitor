@@ -13,6 +13,24 @@
     <SourceRoot Include="C:\Users\S_Pt_V\.nuget\packages\" />
     <SourceRoot Include="D:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Content Include="$(NuGetPackageRoot)arsoft.tools.net\3.5.0\contentFiles\any\net6.0\LICENSE" Condition="Exists('$(NuGetPackageRoot)arsoft.tools.net\3.5.0\contentFiles\any\net6.0\LICENSE')">
+      <NuGetPackageId>ARSoft.Tools.Net</NuGetPackageId>
+      <NuGetPackageVersion>3.5.0</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>LICENSE</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)arsoft.tools.net\3.5.0\contentFiles\any\net6.0\NOTICE" Condition="Exists('$(NuGetPackageRoot)arsoft.tools.net\3.5.0\contentFiles\any\net6.0\NOTICE')">
+      <NuGetPackageId>ARSoft.Tools.Net</NuGetPackageId>
+      <NuGetPackageVersion>3.5.0</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>NOTICE</Link>
+    </Content>
+  </ItemGroup>
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.apidescription.server\6.0.5\build\Microsoft.Extensions.ApiDescription.Server.props" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.apidescription.server\6.0.5\build\Microsoft.Extensions.ApiDescription.Server.props')" />
     <Import Project="$(NuGetPackageRoot)swashbuckle.aspnetcore\6.5.0\build\Swashbuckle.AspNetCore.props" Condition="Exists('$(NuGetPackageRoot)swashbuckle.aspnetcore\6.5.0\build\Swashbuckle.AspNetCore.props')" />

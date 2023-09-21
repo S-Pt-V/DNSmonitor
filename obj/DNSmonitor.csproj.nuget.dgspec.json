@@ -45,6 +45,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "ARSoft.Tools.Net": {
+              "target": "Package",
+              "version": "[3.5.0, )"
+            },
             "Serilog": {
               "target": "Package",
               "version": "[3.0.1, )"
