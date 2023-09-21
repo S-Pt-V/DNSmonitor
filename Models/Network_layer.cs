@@ -5,7 +5,7 @@ namespace DNSmonitor
     /// <summary>
     /// 网络层的IP数据包解析后的数据格式对象
     /// </summary>
-    public class Packet
+    public class IPPacket
     {
         /// <summary>
         /// IP数据包版本号数据字典

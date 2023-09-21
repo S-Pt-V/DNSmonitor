@@ -85,7 +85,7 @@ namespace DNSmonitor.Services
                 }
                 if (count > 0)
                 {
-                    taskFactory.StartNew(() => ResolveService.PacketResolve(buffer, count));
+                    taskFactory.StartNew(() => DataAnalyze(buffer, count));
                 }
             }
             catch (Exception ex)
@@ -93,5 +93,22 @@ namespace DNSmonitor.Services
                 Console.WriteLine(ex.ToString());
             }
         }
+
+        /// <summary>
+        /// 数据解析，在Task中执行
+        /// </summary>
+        /// <param name="buffer">由rawSocket直接抓取到的包含IP头部的原始数据包</param>
+        /// <param name="count">字节数组长度</param>
+        static void DataAnalyze(byte[] buffer, int count)
+        {
+            IPPacket packet = ResolveService.PacketResolve(buffer, count);
+            if (packet == null)
+            {
+                Console.WriteLine("Packet is null");
+                return;
+            }
+            Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10} Bytes", packet.Version, packet.Header_length.ToString(), packet.TOS.ToString(), packet.Total_length.ToString(), packet.Id.ToString(), packet.Offset.ToString(), packet.TTL.ToString(), packet.Protocol, packet.Src_addr, packet.Dst_addr, packet.Payload.Length);
+        }
+
     }
 }
