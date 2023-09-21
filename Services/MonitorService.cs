@@ -12,6 +12,7 @@ namespace DNSmonitor
     {
         // 本机监听的IP地址
         const string local_ip = "192.168.51.214";
+        // const string local_ip = "59.220.240.10";
 
         // 监听用的原始套接字
         private static Socket rawsocket;
@@ -26,7 +27,7 @@ namespace DNSmonitor
         // 监听线程
         private static readonly Thread Listener;
         // 持续监听
-        private static bool listeninng;
+        private static bool listening;
 
         // IP数据包中的信息
         private static Packet? ip_packet;
@@ -50,7 +51,7 @@ namespace DNSmonitor
         /// </summary>
         static MonitorService()
         {
-            listeninng = true;
+            listening = true;
             // 原始套接字初始化
             rawsocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
             recv_buffer = new byte[recv_buffer_length];
@@ -83,6 +84,23 @@ namespace DNSmonitor
         }
 
         /// <summary>
+        /// 开始监听
+        /// </summary>
+        public static void StratListen()
+        {
+            try
+            {
+                listening = true;
+                Listener.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                listening = false;
+            }
+        }
+
+        /// <summary>
         /// 获取监听器当前运行状态
         /// </summary>
         public static MonitorState GetState()
@@ -93,25 +111,9 @@ namespace DNSmonitor
                 Syslog_ip = syslog_ip,
                 Syslog_port = port,
                 ThreadState = Listener.ThreadState.ToString(),
-                Listening = listeninng
+                Listening = listening
             };
             return state;
-        }
-
-        /// <summary>
-        /// 开始监听
-        /// </summary>
-        public static void StratListen()
-        {
-            try
-            {
-                Listener.Start();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                listeninng = false;
-            }
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace DNSmonitor
         {
             try
             {
-                listeninng = false;
+                listening = false;
                 rawsocket.Close();
                 rawsocket.Dispose();
             }
@@ -136,7 +138,7 @@ namespace DNSmonitor
         /// </summary>
         private static void RawsocketListen()
         {
-            while (listeninng)
+            while (listening)
             {
                 try
                 {
@@ -145,13 +147,15 @@ namespace DNSmonitor
                     byte[] databytes = new byte[recved];
                     Array.Copy(recv_buffer, 0, databytes, 0, recved);
                     // 解析IP数据包中的数据
-                    // 新建线程处理
+
+                    // 应该新建线程处理
                     ResloveIPPacket(databytes, recved);
+                    // Console.WriteLine("Received {0} bytes", recved);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
-                    listeninng = false;
+                    listening = false;
                     return;
                 }
             }
@@ -233,7 +237,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                listeninng = false;
+                listening = false;
             }
         }
 
@@ -268,7 +272,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                listeninng = false;
+                listening = false;
             }
         }
 
@@ -317,13 +321,12 @@ namespace DNSmonitor
                     //额外资源记录数
                     Additional_RRs = dns_datagram[10] * 256 + dns_datagram[11]
                 };
-                /*
+                
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(
                     "Queries: {0}\tAnswer RRs: {1}\tAuthorities RRs: {2}\tAdditional RRs: {3}",
                     dnsdata.Questions.ToString(), dnsdata.Answer_RRs.ToString(), dnsdata.Authority_RRs.ToString(), dnsdata.Additional_RRs.ToString()
                     );
-                */
                 // 解析请求部分
                 // 第一个query从第13字节开始，在字节数组中的位置为12 (好像一般都只有一个query)
                 dnsdata.Queries = new List<DNS_query>();
@@ -369,11 +372,10 @@ namespace DNSmonitor
                     // index直接指向下一个部分的开始
                     index += 4;
                 }
-                /*
+
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine(dnsdata.Queries.Count.ToString() + " queries:");
                 foreach (DNS_query query in dnsdata.Queries) Console.WriteLine("Name: " + query.Name + "\tType: " + query.Type + "\tClass: " + query.Class);
-                */
                 try
                 {
                     foreach (DNS_query Q in dnsdata.Queries)
@@ -442,7 +444,7 @@ namespace DNSmonitor
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                listeninng = false;
+                listening = false;
             }
         }
 
