@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using DNSmonitor.Dataformat.NetworkLayer;
 
 namespace DNSmonitor.Services
 {
@@ -50,7 +51,7 @@ namespace DNSmonitor.Services
         public static void CapturePacket()
         {
             // 接受缓冲区
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[65536];
             // 异步回调方法
             AsyncCallback callback = new AsyncCallback(OnReceive);
             // 异步接收数据包
@@ -85,7 +86,8 @@ namespace DNSmonitor.Services
                 }
                 if (count > 0)
                 {
-                    taskFactory.StartNew(() => DataAnalyze(buffer, count));
+                    Task ProcessTask = taskFactory.StartNew(() => DataAnalyze(buffer, count));
+                    ProcessTask.ContinueWith((t) => t.Dispose());
                 }
             }
             catch (Exception ex)
@@ -101,13 +103,31 @@ namespace DNSmonitor.Services
         /// <param name="count">字节数组长度</param>
         static void DataAnalyze(byte[] buffer, int count)
         {
-            IPPacket packet = ResolveService.PacketResolve(buffer, count);
+            IPpacket packet = ResolveService.IPPacketResolve(buffer, count);
             if (packet == null)
             {
                 Console.WriteLine("Packet is null");
                 return;
             }
-            Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10} Bytes", packet.Version, packet.Header_length.ToString(), packet.TOS.ToString(), packet.Total_length.ToString(), packet.Id.ToString(), packet.Offset.ToString(), packet.TTL.ToString(), packet.Protocol, packet.Src_addr, packet.Dst_addr, packet.Payload.Length);
+            // Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10} Bytes", packet.Version, packet.Header_length.ToString(), packet.Tos, packet.Total_length.ToString(), packet.Id.ToString(), packet.Offset.ToString(), packet.TTL.ToString(), packet.Protocol, packet.Src_addr, packet.Dst_addr, packet.Data.Length);
+            switch(packet.Protocol)
+            {
+                case (ushort)IIIProtocol.ICMP:
+                    Console.WriteLine("ICMP");
+                    break;
+                case (ushort)IIIProtocol.IGMP:
+                    Console.WriteLine("IGMP");
+                    break;
+                case (ushort)IIIProtocol.TCP:
+                    Console.WriteLine("TCP");
+                    break;
+                case (ushort)IIIProtocol.UDP:
+                    Console.WriteLine("UDP");
+                    break;
+                default:
+                    Console.WriteLine("UNKNOWN");
+                    break;
+            }
         }
 
     }
