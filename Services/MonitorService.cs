@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using DNSmonitor.Dataformat.NetworkLayer;
+using DNSmonitor.Dataformat.TransportLayer;
 
 namespace DNSmonitor.Services
 {
@@ -122,7 +123,8 @@ namespace DNSmonitor.Services
                     Console.WriteLine("TCP");
                     break;
                 case (ushort)IIIProtocol.UDP:
-                    Console.WriteLine("UDP");
+                    UDPdatagram datagram = ResolveService.UDPdatagramResolve(packet.Data);
+                    Console.WriteLine("{0}:{1}\t->\t{2}:{3}\t{4} Bytes", packet.Src_addr, datagram.Src_port, packet.Dst_addr, datagram.Dst_port, datagram.Data.Length);
                     break;
                 default:
                     Console.WriteLine("UNKNOWN");

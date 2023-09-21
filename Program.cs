@@ -55,7 +55,7 @@ app.MapControllers();
 // app.UseCors("Cors");
 
 MonitorService.CapturePacket();
-Console.ReadKey();
-MonitorService.StopCapture();
+// Console.ReadKey();
+// MonitorService.StopCapture();
 
 app.Run();

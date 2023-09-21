@@ -1,4 +1,5 @@
 ﻿using DNSmonitor.Dataformat.NetworkLayer;
+using DNSmonitor.Dataformat.TransportLayer;
 using System.Net;
 
 namespace DNSmonitor.Services
@@ -62,6 +63,32 @@ namespace DNSmonitor.Services
                 packet.Data = new byte[payloadlength];
                 Array.Copy(buffer, packet.Header_length, packet.Data, 0, payloadlength);
                 return packet;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 解析UDP数据包
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
+        public static UDPdatagram UDPdatagramResolve(byte[] buffer)
+        {
+            try
+            {
+                UDPdatagram datagram = new UDPdatagram();
+                datagram.Src_port = (ushort)(buffer[0] * 256 + buffer[1]);
+                datagram.Dst_port = (ushort)(buffer[2] * 256 + buffer[3]);
+                datagram.Length = (ushort)(buffer[4] * 256 + buffer[5]);
+                datagram.Checksum = (ushort)(buffer[6] * 256 + buffer[7]);
+                int datalength = buffer.Length - 8;
+                datagram.Data = new byte[datalength];
+                Array.Copy(buffer, 8, datagram.Data, 0, datalength);
+                return datagram;
             }
             catch(Exception ex)
             {
